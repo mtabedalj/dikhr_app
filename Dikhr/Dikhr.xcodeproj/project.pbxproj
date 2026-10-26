@@ -1,0 +1,1013 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+		D1KHR00000000000000000021 /* DikhrWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = DikhrWidget; sourceTree = "<group>"; };
+		D1KHR00000000000000000022 /* DikhrCore */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = DikhrCore; sourceTree = "<group>"; };
+		D1KHR0000000000000000006035 /* DikhrFocusShieldWrapper.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D1KHR0000000000000000006020 /* DikhrFocusShieldWrapper.appex */; settings = {ATTRIBUTES = (RemoveHeaders, ); }; };
+		D1KHR0000000000000000007035 /* DikhrFocusMonitorWrapper.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D1KHR0000000000000000007020 /* DikhrFocusMonitorWrapper.appex */; settings = {ATTRIBUTES = (RemoveHeaders, ); }; };
+		D1KHR0000000000000000008035 /* DikhrFocusActionWrapper.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D1KHR0000000000000000008020 /* DikhrFocusActionWrapper.appex */; settings = {ATTRIBUTES = (RemoveHeaders, ); }; };
+		D1KHR0000000000000000009035 /* DikhrWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = D1KHR0000000000000000009020 /* DikhrWatch.app */; settings = {ATTRIBUTES = (RemoveHeaders, ); }; };
+		D1KHR00000000000000000035 /* DikhrWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D1KHR00000000000000000020 /* DikhrWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeaders, ); }; };
+/* Begin PBXFileReference section */
+		D1KHR00000000000000000002 /* Dikhr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Dikhr.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D1KHR0000000000000000006020 /* DikhrFocusShieldWrapper.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DikhrFocusShieldWrapper.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D1KHR0000000000000000007020 /* DikhrFocusMonitorWrapper.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DikhrFocusMonitorWrapper.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D1KHR0000000000000000008020 /* DikhrFocusActionWrapper.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DikhrFocusActionWrapper.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D1KHR0000000000000000006021 /* DikhrFocusShield */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = DikhrFocusShield; sourceTree = "<group>"; };
+		D1KHR0000000000000000007021 /* DikhrFocusMonitor */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = DikhrFocusMonitor; sourceTree = "<group>"; };
+		D1KHR0000000000000000008021 /* DikhrFocusAction */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = DikhrFocusAction; sourceTree = "<group>"; };
+		D1KHR0000000000000000009020 /* DikhrWatch.app */ = {isa = PBXFileReference; explicitFileType = "wrapper.application"; includeInIndex = 0; path = DikhrWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D1KHR0000000000000000009021 /* DikhrWatch */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = DikhrWatch; sourceTree = "<group>"; };
+		D1KHR00000000000000000008 /* Dikhr */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Dikhr; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+		D1KHR00000000000000000020 /* DikhrWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = DikhrWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+/* Begin PBXBuildFile (frameworks) */
+		D1KHR000000000000000000B7 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = D1KHR000000000000000000B2 /* FirebaseCore */; };
+		D1KHR000000000000000000B8 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = D1KHR000000000000000000B3 /* FirebaseAnalytics */; };
+		D1KHR000000000000000000B9 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = D1KHR000000000000000000B4 /* FirebaseCrashlytics */; };
+		D1KHR000000000000000000BA /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = D1KHR000000000000000000B5 /* FirebaseMessaging */; };
+		D1KHR000000000000000000BB /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = D1KHR000000000000000000B6 /* FirebaseRemoteConfig */; };
+
+/* Begin PBXBuildFile (firebase frameworks) */
+		D1KHR000000000000000000B7 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = D1KHR000000000000000000B2 /* FirebaseCore */; };
+		D1KHR000000000000000000B8 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = D1KHR000000000000000000B3 /* FirebaseAnalytics */; };
+		D1KHR000000000000000000B9 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = D1KHR000000000000000000B4 /* FirebaseCrashlytics */; };
+		D1KHR000000000000000000BA /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = D1KHR000000000000000000B5 /* FirebaseMessaging */; };
+		D1KHR000000000000000000BB /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = D1KHR000000000000000000B6 /* FirebaseRemoteConfig */; };
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D1KHR0000000000000000000A /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resources,
+			);
+			target = D1KHR00000000000000000001 /* Dikhr */;
+		};
+		D1KHR00000000000000000050 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				DikhrWidgetExtension.entitlements,
+				Resources,
+			);
+			target = D1KHR00000000000000000030 /* DikhrWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXGroup section */
+		D1KHR00000000000000000003 = {
+			isa = PBXGroup;
+			children = (
+				D1KHR00000000000000000008 /* Dikhr */,
+				D1KHR00000000000000000021 /* DikhrWidget */,
+				D1KHR00000000000000000022 /* DikhrCore */,
+				D1KHR0000000000000000009021 /* DikhrWatch */,
+				D1KHR00000000000000000004 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D1KHR00000000000000000004 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D1KHR00000000000000000002 /* Dikhr.app */,
+				D1KHR00000000000000000020 /* DikhrWidgetExtension.appex */,
+				D1KHR0000000000000000006020 /* DikhrFocusShieldWrapper.appex */,
+				D1KHR0000000000000000007020 /* DikhrFocusMonitorWrapper.appex */,
+				D1KHR0000000000000000008020 /* DikhrFocusActionWrapper.appex */,
+				D1KHR0000000000000000009020 /* DikhrWatch.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D1KHR00000000000000000001 /* Dikhr */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D1KHR0000000000000000000E /* Build configuration list for PBXNativeTarget "Dikhr" */;
+			buildPhases = (
+				D1KHR0000000000000000000B /* Sources */,
+				D1KHR0000000000000000000C /* Frameworks */,
+				D1KHR0000000000000000000D /* Resources */,
+				D1KHR00000000000000000034 /* Embed Foundation Extensions */,
+				D1KHR0000000000000000009034 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D1KHR00000000000000000040 /* PBXTargetDependency */,
+				D1KHR00000000000000000090140 /* PBXTargetDependency */,
+				D1KHR00000000000000000080140 /* PBXTargetDependency */,
+				D1KHR00000000000000000070140 /* PBXTargetDependency */,
+				D1KHR00000000000000000060140 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				D1KHR00000000000000000008 /* Dikhr */,
+				D1KHR00000000000000000022 /* DikhrCore */,
+			);
+			fileSystemSynchronizedExceptions = (
+				D1KHR0000000000000000000A,
+			);
+			name = Dikhr;
+			packageProductDependencies = (
+				D1KHR000000000000000000B2 /* FirebaseCore */,
+				D1KHR000000000000000000B3 /* FirebaseAnalytics */,
+				D1KHR000000000000000000B4 /* FirebaseCrashlytics */,
+				D1KHR000000000000000000B5 /* FirebaseMessaging */,
+				D1KHR000000000000000000B6 /* FirebaseRemoteConfig */,
+			);
+			productName = Dikhr;
+			productReference = D1KHR00000000000000000002 /* Dikhr.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+		D1KHR0000000000000000006030 /* DikhrFocusShieldShield */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D1KHR0000000000000000006031 /* Build configuration list for PBXNativeTarget "DikhrFocusShieldShield" */;
+			buildPhases = (
+				D1KHR0000000000000000006036 /* Sources */,
+				D1KHR0000000000000000006037 /* Frameworks */,
+				D1KHR0000000000000000006038 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D1KHR0000000000000000006021 /* DikhrFocusShield */,
+				D1KHR00000000000000000022 /* DikhrCore */,
+			);
+			name = DikhrFocusShieldShield;
+			packageProductDependencies = (
+			);
+			productName = DikhrFocusShieldShield;
+			productReference = D1KHR0000000000000000006020 /* DikhrFocusShieldWrapper.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		D1KHR0000000000000000007030 /* DikhrFocusMonitorMonitor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D1KHR0000000000000000007031 /* Build configuration list for PBXNativeTarget "DikhrFocusMonitorMonitor" */;
+			buildPhases = (
+				D1KHR0000000000000000007036 /* Sources */,
+				D1KHR0000000000000000007037 /* Frameworks */,
+				D1KHR0000000000000000007038 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D1KHR0000000000000000007021 /* DikhrFocusMonitor */,
+				D1KHR00000000000000000022 /* DikhrCore */,
+			);
+			name = DikhrFocusMonitorMonitor;
+			packageProductDependencies = (
+			);
+			productName = DikhrFocusMonitorMonitor;
+			productReference = D1KHR0000000000000000007020 /* DikhrFocusMonitorWrapper.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		D1KHR0000000000000000008030 /* DikhrFocusActionAction */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D1KHR0000000000000000008031 /* Build configuration list for PBXNativeTarget "DikhrFocusActionAction" */;
+			buildPhases = (
+				D1KHR0000000000000000008036 /* Sources */,
+				D1KHR0000000000000000008037 /* Frameworks */,
+				D1KHR0000000000000000008038 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D1KHR0000000000000000008021 /* DikhrFocusAction */,
+				D1KHR00000000000000000022 /* DikhrCore */,
+			);
+			name = DikhrFocusActionAction;
+			packageProductDependencies = (
+			);
+			productName = DikhrFocusActionAction;
+			productReference = D1KHR0000000000000000008020 /* DikhrFocusActionWrapper.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+
+		D1KHR0000000000000000009030 /* DikhrWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D1KHR0000000000000000009031 /* Build configuration list for PBXNativeTarget "DikhrWatch" */;
+			buildPhases = (
+				D1KHR0000000000000000009036 /* Sources */,
+				D1KHR0000000000000000009037 /* Frameworks */,
+				D1KHR0000000000000000009038 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D1KHR0000000000000000009021 /* DikhrWatch */,
+				D1KHR00000000000000000022 /* DikhrCore */,
+			);
+			name = DikhrWatch;
+			packageProductDependencies = (
+			);
+			productName = DikhrWatch;
+			productReference = D1KHR0000000000000000009020 /* DikhrWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D1KHR00000000000000000030 /* DikhrWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D1KHR00000000000000000031 /* Build configuration list for PBXNativeTarget "DikhrWidgetExtension" */;
+			buildPhases = (
+				D1KHR00000000000000000036 /* Sources */,
+				D1KHR00000000000000000037 /* Frameworks */,
+				D1KHR00000000000000000038 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D1KHR00000000000000000021 /* DikhrWidget */,
+				D1KHR00000000000000000022 /* DikhrCore */,
+			);
+			fileSystemSynchronizedExceptions = (
+				D1KHR00000000000000000050,
+			);
+			name = DikhrWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = DikhrWidgetExtension;
+			productReference = D1KHR00000000000000000020 /* DikhrWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+
+/* Begin PBXContainerItemProxy section */
+		D1KHR0000000000000000006041 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D1KHR00000000000000000005 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D1KHR0000000000000000006030;
+			remoteInfo = DikhrFocusShield;
+		};
+/* End PBXContainerItemProxy section */
+/* Begin PBXContainerItemProxy section */
+		D1KHR0000000000000000007041 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D1KHR00000000000000000005 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D1KHR0000000000000000007030;
+			remoteInfo = DikhrFocusMonitor;
+		};
+/* End PBXContainerItemProxy section */
+/* Begin PBXContainerItemProxy section */
+		D1KHR0000000000000000008041 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D1KHR00000000000000000005 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D1KHR0000000000000000008030;
+			remoteInfo = DikhrFocusAction;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXContainerItemProxy section_addendum */
+		D1KHR0000000000000000009041 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D1KHR00000000000000000005 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D1KHR0000000000000000009030;
+			remoteInfo = DikhrWatch;
+		};
+
+/* Begin PBXTargetDependency section */
+		D1KHR00000000000000000040 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D1KHR00000000000000000030 /* DikhrWidgetExtension */;
+			targetProxy = D1KHR00000000000000000041 /* PBXContainerItemProxy */;
+		};
+		D1KHR00000000000000000060140 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D1KHR0000000000000000006030 /* DikhrFocusShield */;
+			targetProxy = D1KHR0000000000000000006041 /* PBXContainerItemProxy */;
+		};
+		D1KHR00000000000000000070140 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D1KHR0000000000000000007030 /* DikhrFocusMonitor */;
+			targetProxy = D1KHR0000000000000000007041 /* PBXContainerItemProxy */;
+		};
+		D1KHR00000000000000000080140 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D1KHR0000000000000000008030 /* DikhrFocusAction */;
+			targetProxy = D1KHR0000000000000000008041 /* PBXContainerItemProxy */;
+		};
+
+		D1KHR00000000000000000090140 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D1KHR0000000000000000009030 /* DikhrWatch */;
+			targetProxy = D1KHR0000000000000000009041 /* PBXContainerItemProxy */;
+		};
+
+/* End PBXTargetDependency section */
+
+/* Begin PBXContainerItemProxy section */
+		D1KHR00000000000000000041 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D1KHR00000000000000000005 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D1KHR00000000000000000030;
+			remoteInfo = DikhrWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+/* Begin PBXProject section */
+		D1KHR00000000000000000005 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					D1KHR00000000000000000001 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+				};
+			};
+			buildConfigurationList = D1KHR0000000000000000000F /* Build configuration list for PBXProject "Dikhr" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+				Base,
+				ar,
+			);
+			packageReferences = (
+				D1KHR000000000000000000B1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
+			mainGroup = D1KHR00000000000000000003;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D1KHR00000000000000000004 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D1KHR00000000000000000001 /* Dikhr */,
+				D1KHR00000000000000000030 /* DikhrWidgetExtension */,
+				D1KHR0000000000000000006030 /* DikhrFocusShield */,
+				D1KHR0000000000000000007030 /* DikhrFocusMonitor */,
+				D1KHR0000000000000000008030 /* DikhrFocusAction */,
+				D1KHR0000000000000000009030 /* DikhrWatch */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D1KHR0000000000000000000B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+		D1KHR0000000000000000009034 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				D1KHR0000000000000000009035 /* DikhrWatch.app in Embed Watch Content */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+
+		D1KHR00000000000000000034 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D1KHR00000000000000000035 /* DikhrWidgetExtension.appex in Embed Foundation Extensions */,
+				D1KHR0000000000000000006035 /* DikhrFocusShieldWrapper.appex in Embed Foundation Extensions */,
+				D1KHR0000000000000000007035 /* DikhrFocusMonitorWrapper.appex in Embed Foundation Extensions */,
+				D1KHR0000000000000000008035 /* DikhrFocusActionWrapper.appex in Embed Foundation Extensions */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+
+/* Begin PBXFrameworksBuildPhase section */
+		D1KHR0000000000000000000C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D1KHR000000000000000000B7 /* FirebaseCore in Frameworks */,
+				D1KHR000000000000000000B8 /* FirebaseAnalytics in Frameworks */,
+				D1KHR000000000000000000B9 /* FirebaseCrashlytics in Frameworks */,
+				D1KHR000000000000000000BA /* FirebaseMessaging in Frameworks */,
+				D1KHR000000000000000000BB /* FirebaseRemoteConfig in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D1KHR0000000000000000000D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+		D1KHR00000000000000000036 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1KHR00000000000000000037 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1KHR00000000000000000038 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+
+		D1KHR0000000000000000006036 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1KHR0000000000000000006037 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1KHR0000000000000000006038 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1KHR0000000000000000007036 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1KHR0000000000000000007037 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1KHR0000000000000000007038 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1KHR0000000000000000008036 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1KHR0000000000000000008037 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1KHR0000000000000000008038 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+
+		D1KHR0000000000000000009036 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1KHR0000000000000000009037 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D1KHR0000000000000000009038 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D1KHR000000000000000000B1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+/* Begin XCBuildConfiguration section */
+		D1KHR00000000000000000006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(SWIFT_ACTIVE_COMPILATION_CONDITIONS)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D1KHR00000000000000000007 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D1KHR0000000000000000006032 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DikhrFocusShield/PrayerFocusShield.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PrayerFocusShieldInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Prayer Focus Shield";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dikhr.app.prayfocusshield;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D1KHR0000000000000000006033 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DikhrFocusShield/PrayerFocusShield.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PrayerFocusShieldInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Prayer Focus Shield";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dikhr.app.prayfocusshield;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D1KHR0000000000000000007032 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DikhrFocusMonitor/PrayerFocusMonitor.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PrayerFocusMonitorInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Prayer Focus";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dikhr.app.prayfocusmonitor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D1KHR0000000000000000007033 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DikhrFocusMonitor/PrayerFocusMonitor.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PrayerFocusMonitorInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Prayer Focus";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dikhr.app.prayfocusmonitor;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D1KHR0000000000000000008032 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DikhrFocusAction/PrayerFocusAction.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PrayerFocusActionInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Prayer Focus Action";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dikhr.app.prayfocusaction;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D1KHR0000000000000000008033 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = DikhrFocusAction/PrayerFocusAction.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PrayerFocusActionInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Prayer Focus Action";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dikhr.app.prayfocusaction;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+
+		D1KHR0000000000000000009032 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Dikhr;
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = dev.dikhr.app;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dikhr.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		D1KHR0000000000000000009033 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Dikhr;
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = dev.dikhr.app;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dikhr.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+
+		D1KHR00000000000000000010 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DikhrInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Dikhr;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Dikhr uses the microphone for the voice counter to count your dhikr aloud.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Dikhr uses speech recognition to count your dhikr automatically as you recite it.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Dikhr uses your location to show accurate prayer times and the Qibla direction.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dikhr.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D1KHR00000000000000000011 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DikhrInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Dikhr;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Dikhr uses the microphone for the voice counter to count your dhikr aloud.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Dikhr uses speech recognition to count your dhikr automatically as you recite it.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Dikhr uses your location to show accurate prayer times and the Qibla direction.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dikhr.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D1KHR00000000000000000032 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WidgetInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Dikhr Widgets";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dikhr.app.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D1KHR00000000000000000033 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WidgetInfo.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Dikhr Widgets";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.dikhr.app.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D1KHR0000000000000000000E /* Build configuration list for PBXNativeTarget "Dikhr" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D1KHR00000000000000000010 /* Debug */,
+				D1KHR00000000000000000011 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D1KHR0000000000000000000F /* Build configuration list for PBXProject "Dikhr" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D1KHR00000000000000000006 /* Debug */,
+				D1KHR00000000000000000007 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D1KHR00000000000000000031 /* Build configuration list for PBXNativeTarget "DikhrWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D1KHR00000000000000000032 /* Debug */,
+				D1KHR00000000000000000033 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+
+		D1KHR0000000000000000006031 /* Build configuration list for PBXNativeTarget "DikhrFocusShield" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D1KHR0000000000000000006032 /* Debug */,
+				D1KHR0000000000000000006033 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D1KHR0000000000000000007031 /* Build configuration list for PBXNativeTarget "DikhrFocusMonitor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D1KHR0000000000000000007032 /* Debug */,
+				D1KHR0000000000000000007033 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D1KHR0000000000000000008031 /* Build configuration list for PBXNativeTarget "DikhrFocusAction" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D1KHR0000000000000000008032 /* Debug */,
+				D1KHR0000000000000000008033 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+
+		D1KHR0000000000000000009031 /* Build configuration list for PBXNativeTarget "DikhrWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D1KHR0000000000000000009032 /* Debug */,
+				D1KHR0000000000000000009033 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+
+/* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D1KHR000000000000000000B2 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D1KHR000000000000000000B1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		D1KHR000000000000000000B3 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D1KHR000000000000000000B1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		D1KHR000000000000000000B4 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D1KHR000000000000000000B1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		D1KHR000000000000000000B5 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D1KHR000000000000000000B1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		D1KHR000000000000000000B6 /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D1KHR000000000000000000B1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = D1KHR00000000000000000005 /* Project object */;
+}

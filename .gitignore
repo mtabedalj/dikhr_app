@@ -1,0 +1,20 @@
+# Private / licensed-for-personal-use content — never distribute
+Dikhr/Dikhr/GoogleService-Info.plist
+Dikhr/Dikhr/Resources/Audio/
+Dikhr/Dikhr/Resources/Fonts/ExpoArabic-Book.ttf
+Dikhr/Dikhr/Resources/Fonts/Anton-Regular.ttf
+target/
+*.hop
+
+# Build artifacts
+Dikhr/build/
+DerivedData/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+xcuserdata/
+.DS_Store
+
+# Analysis scratch
+scripts/tmp/
+notes/verify_raw/
+# Copyrighted tafsir text (reuse locally, do not redistribute)
+Dikhr/Dikhr/Resources/tafseer.sqlite

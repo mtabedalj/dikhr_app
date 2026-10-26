@@ -1,0 +1,10 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dikhr-design",
+      "port": 49322,
+      "url": "http://127.0.0.1:49322"
+    }
+  ]
+}

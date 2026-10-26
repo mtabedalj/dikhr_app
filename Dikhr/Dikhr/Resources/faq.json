@@ -1,0 +1,122 @@
+[
+ {
+  "question": "ما هو تطبيق أذكار؟",
+  "questionEN": "What is Athkar app?",
+  "answer": "تطبيق أذكار تطبيق للايفون و الايباد، سهل الاستخدام يشمل على الأذكار و الأدعية المهمة من الكتاب و السنة - أذكار الصباح - أذكار المساء - الأذكار عند النوم - أدعية من القران الكريم - الرقية الشرعية من القرآن و السنة - من دعاء الرسول صلى الله عليه و سلم ومواقيت الصلاة في مدينتك و اتجاه القبلة.",
+  "answerEN": "This iPhone and iPad app is easy to use. It includes important remembrances and supplications from the Qur'an and Sunnah - morning remembrances - evening remembrances - bedtime remembrances - supplications from the Holy Qur'an and more. Prayer times in your city and the direction of the Qibla."
+ },
+ {
+  "question": "ما هو مصدر الأذكار؟",
+  "questionEN": "Where does the app's content come from?",
+  "answer": "الأذكار و الادعية المستخدمة في هذا التطبيق تم مراجعتها بدقة وهي من الكتاب و السُنة تم جمعها من عِدة مصادر منها كتاب تحفة الذاكرين بعدة الحصن و الحصين من كلام سيد المرسلين للإمام محمد بن علي بن محمد الشوكاني وكتاب عمل اليوم والليلة لابن السُني. إذا كانت لديك اية ملاحظات على التطبيق او وجدت أخطاء في النصوص الرجاء التكرم بمراسلتنا.",
+  "answerEN": "The supplications / dua’a used in this app have been carefully reviewed and are from the Qur’an and Sunnah. They were collected from several sources, including the book Tuhfat al-Dhakirin bi-Addat al-Hisn wa al-Husayn from the words of the Master of the Messengers by Imam Muhammad bin Ali bin Muhammad al-Shawkani and the book “Action of the Day and the Night” by Ibn al-Sunni. Please let us know if you find any errors in the text or have any comments about the app."
+ },
+ {
+  "question": "المصحف غير كامل!",
+  "questionEN": "The Qur'an is not complete!",
+  "answer": "المصحف كامل في التطبيق. ومتوفر في iOS 17 والنسخ الجديدة من النظام.\n\nيجب تحريك الصفحة  بشكل عمودي من الأعلى إلى الأسفل أو العكس لمشاهدة كامل المحتوى. \n\nومن اليمين إلى اليسار أو العكس للانتقال بين الصفحات.",
+  "answerEN": "The entire Quran is available in the app (in iOS17+).\n\nScroll vertically from top to bottom or vice versa to view the full content.\n\nScroll right to left or vice versa to navigate between pages."
+ },
+ {
+  "question": "مواقيت الصلاة غير دقيقة!",
+  "questionEN": "Prayer times are inaccurate!",
+  "answer": "اذهب إلى إعدادات التطبيق\nاضغط التاريخ الهجري ومواقيت الصلاة\nتأكد من المدينة و طرق حساب المواقيت",
+  "answerEN": "Go to the app settings\n\nClick on the Hijri date and prayer times\n\nCheck the city and time calculation methods"
+ },
+ {
+  "question": "مواقيت الصلاة لا تعمل في ساعة ابل!",
+  "questionEN": "Prayer times do not work on Apple Watch!",
+  "answer": "تأكد أولًا من أن مواقيت الصلاة تعمل بشكل جيد في جهازك.\nادخل تطبيق أذكار في الساعة. ادخل الاعدادات - ثم فعل المزامنة اليدوية. \nوفي نفس الوقت ادخل مواقيت الصلاة في التطبيق في الايفون.\nاضغط على تحديث مواقيت الصلاة اسفل الشاشة.\nإذا لم تعمل. حاول مرة آخرى.",
+  "answerEN": "First, make sure that prayer times work well on your device.\nGo to Athkar on Apple Watch\nGo to Settings, enable manual synchronization.\nAt the same time, to to Athkar > prayer times on the iPhone.\nClick on Update prayer times at the bottom of the screen.\nThen go to prayer times on the Apple Watch\nIf it doesn't work. Try again."
+ },
+ {
+  "question": "الويدجت اختفى يظهر باللون الأسود أو الأبيض",
+  "questionEN": "The widget has disappeared and appears in black or white!",
+  "answer": "الرجاء حذف الويدجت واضافته من جديد أو إعادة تشغيل الجهاز",
+  "answerEN": "Please delete the widget and add it again or restart the device."
+ },
+ {
+  "question": "كيف أغير شكل الويدجت؟",
+  "questionEN": "How do I change the appearance of the widget?",
+  "answer": "اضغط مطولًا على الويدجت ثم اختر تحرير الأداة ثم غير النواع أو الخلفية.",
+  "answerEN": "Long Press and hold the widget, then choose Edit widget, then change the type or background."
+ },
+ {
+  "question": "مواقيت الصلاة في الويدجت لاتتغير!",
+  "questionEN": "Prayer times in Widget do not change!",
+  "answer": "هناك عدة طرق لحل هذه المشكلة.\nأضغط على الويدجت للدخول إلى التطبيق وسيتم التحديث. \nأو أعد تشغيل الجهاز.",
+  "answerEN": "There are several ways to solve this problem.\nClick on the widget to enter the app and it will update.\nOr restart the device."
+ },
+ {
+  "question": "لماذا لا اسمع تنبيهات الأذان؟",
+  "questionEN": "I am not hearing athan alerts. Why is that?",
+  "answer": "بالنسبة لمنبه الأذان في تطبيق أذكار. هناك بعض الامور محدودة بسبب قيود نظام iOS وهي: \n\n* صوت المنبه لا يعمل اذا كان الجهاز على الصامت أو  على وضعية عدم الإزعاج Do Not Disturb \n* المنبه في نظام iOS مدته القصوى 30  ثانية فقط.  \n* إذا كان الجهاز في وضعية التشغيل. ستكون المدة اقل.  \n* لن تسمع صوت الأذان إذا كنت تستخدم ساعة أبل والجهاز مغلق.",
+  "answerEN": "The iOS system has some limitations, including:\n\nIf the device is set to silent or do not disturb, the alarm will not sound\n\nIn iOS, the alarm can last only 30 seconds.\n\nThe duration will be shorter if the screen is on.\n\nIf you are using the Apple Watch and it is turned off, you will not hear the athan sound."
+ },
+ {
+  "question": "لماذا لا اسمع الأذان كاملا عند استلام تنبيه الأذان؟",
+  "questionEN": "Why can't I hear the full athan when I receive the athan alert?",
+  "answer": "لا يوجد حاليًا الأذان كاملًا لأن التنبيه في أجهزة ابل محدود بــ 30 ثانية فقط. عند استلامك التنبيه اضغط عليه لتسمع الأذان كاملًا.",
+  "answerEN": "There is currently no full athan because the alert on Apple devices is limited to only 30 seconds. When you receive the alert, click on it to hear the full athan."
+ },
+ {
+  "question": "هل يمكنني استلام تنبيه قبل الأذان؟",
+  "questionEN": "Can I receive an alert before the athan?",
+  "answer": "نعم يمكنك استلام تنبيهات قبل الأذان أو قبل الثلث الأخير من الليل.\nاذهب إلى الإعدادات.\nثم منبه الأذكار.\nثم منبه مواقيت الصلاة و اختر الخيار المناسب لك.",
+  "answerEN": "Yes, you can receive alerts before the athan:\nGo to settings.\nThen Athkar notifications.\nThen, the prayer times alarm, and choose the appropriate option for you."
+ },
+ {
+  "question": "وقت أذان العشاء متأخر عن الوقت الصحيح في مدينتي؟",
+  "questionEN": "There is a problem with Isha time!",
+  "answer": "ادخل إعدادات التطبيق \nثم التاريخ و مواقيت الصلاة \nثم غير في طريقة ضبط خط العرض المرتفع",
+  "answerEN": "Enter the application settings\nThen the date and prayer times\nThen change the method of adjusting the high latitude"
+ },
+ {
+  "question": "هل يمكنني ترتيب قائمة الأذكار في الواجهة الرئيسية؟",
+  "questionEN": "Can I arrange the list in the main interface?",
+  "answer": "نعم يمكنك فعل ذلك عن طريق الضغط على اسم القسم ضغطة مطولة وتحريكه الى المكان المناسب لك",
+  "answerEN": "Yes, you can do that by long pressing on the section name and moving it to the appropriate place for you"
+ },
+ {
+  "question": "أين محتويات قسم أذكاري؟",
+  "questionEN": "Where are the contents of the My Athkar section?",
+  "answer": "إذا كان جهازك متصل بحساب الأيكلاود iCloud الخاص بك من ابل، ستحفظ محتويات هذا القسم به ويمكنك تصفح نفس المحتويات في الأجهزة الأخرى التي تستخدم نفس الحساب. يجب عليك التأكد دائمًا من الاتصال بحساب الأيكلاود الخاص بك. أنت المسؤول الوحيد عن حفظ وأخذ نسخ إحتياطية من محتويات القسم من خلال صفحة إدارة المحتوى في إعدادات التطبيق. تأكد دائمًا من ذلك.",
+  "answerEN": "If your device is connected to your iCloud account from Apple, the contents of this section will be saved in it and you can browse the same contents on other devices that use the same account. You should always make sure you are connected to your iCloud account. You are solely responsible for saving and taking backup copies of the section's contents through the content management page in the app settings. Always check this."
+ },
+ {
+  "question": "كيف يمكنني اخذ نسخة احتياطية لقسم أذكاري؟",
+  "questionEN": "How can I take a backup copy of my athkar section?",
+  "answer": "اذهب إلى الإعدادات.\nثم أذكاري.\nاتبع الخطوات الموضحة.\nاحفضها في اي برنامج مثلًا تطبيق الملاحظات.",
+  "answerEN": "Go to settings.\nThen My Athkar.\nFollow the steps shown.\nSave it in any apps, such as the Notes app."
+ },
+ {
+  "question": "اتجاه القبلة غير دقيق!",
+  "questionEN": "The direction of the Qibla is not accurate!",
+  "answer": "للحصول على نتيجة دقيقة حرك الجهاز أولاً ثم اتركه ثابتًا وابعده عن الأجهزة الإلكترونية والتأكد من عدم استخدام أغطية تحتوي على المغناطيس خلف الجهاز.",
+  "answerEN": "To get an accurate result, move the device first, then leave it stationary, keep it away from electronic devices, and ensure not to use magnet-containing covers behind the device."
+ },
+ {
+  "question": "اتجاه القبلة عند الكعبة خاطئ!",
+  "questionEN": "The direction of the Qibla at the Kaaba is wrong!",
+  "answer": "لن يكون الاتجاه دقيقاً إذا جربت تحديد الاتجاه داخل الحرم المكي. لأنك ستكون داخل خطوط الطول والعرض للحرم. يمكنك الخروج من المسجد الحرام بمسافة و التجربة.",
+  "answerEN": "The direction will not be accurate if you try to determine the direction inside the Grand Mosque in Mecca. This is because you will be within the Haram's longitude and latitude lines."
+ },
+ {
+  "question": "ما هي النسخة الحصرية؟",
+  "questionEN": "What is the exclusive version?",
+  "answer": "النسخة الحصرية مختلفة عن النسخة العادية المجانية، النسخة الحصرية مميزة بخصائصها الحصرية للمشتركين فقط. الهدف من هذه النسخة هو اتاحة الفرصة لمشاركة المستخدمين في دعم استمرارية التطبيق و استخدام مزايا حصرية. يمكنك الاشتراك بالنسخة الحصرية عن طريق اعدادات التطبيق.",
+  "answerEN": "The exclusive version is different from the regular, free version. The exclusive version is distinguished by its exclusive features for subscribers only. The goal of this version is to provide the opportunity for users to participate in supporting the continuity of the application and using exclusive features. You can subscribe to the exclusive version through the application settings."
+ },
+ {
+  "question": "أنا مشترك لكن لا تظهر لي النسخة الحصرية!",
+  "questionEN": "I'm a subscriber but I don't see the exclusive version!",
+  "answer": "ادخل الإعدادات ثم \nادخل النسخة الحصرية \nاضغط على اعادة تعيين الاشتراكات \nاخرج من الصفحة. \nاذا لم تحل المشكلة الرجاء مراسلة المطور.",
+  "answerEN": "Enter settings then\nEnter the exclusive version\nClick on restore Subscriptions\nExit the page.\nIf the problem is not solved, please get in touch with the developer."
+ },
+ {
+  "question": "ما هي صلاة الإشراق؟",
+  "questionEN": "Ishraq Prayer",
+  "answer": "مع بداية الإشراق (أي بعد شروق الشمس بحوالي 15–20 دقيقة) يمكن أداء صلاة الإشراق، لأن ما قبل ذلك هو وقت نهي عن الصلاة.\n\nصلاة الإشراق:\n\nركعتان نافلة (سُنّة مستحبة) تُصلّى بعد أن ترتفع الشمس مقدار رمح، أي بعد ربع ساعة تقريبًا من الشروق.\nوهي نفسها صلاة الضحى في أول وقتها.\n\n🔸 الفرق بين الشروق والإشراق:\n\nوقت الشروق: لحظة طلوع الشمس من الأفق.\n\nوقت الإشراق: بعد أن ترتفع الشمس قليلًا (قيد رمح)، أي بعد الشروق بـ 15 دقيقة تقريبًا.\nالفرق بينها وبين الشروق:\n\nوقت الشروق هو الوقت الذي تطلع فيه الشمس.\n\nأما صلاة الإشراق فتكون بعد أن ترتفع الشمس قيد رمح، أي بعد حوالي ربع ساعة من الشروق.",
+  "answerEN": "Ishraq Prayer is a two-unit (rak‘ah) optional prayer offered around 15–20 minutes after sunrise."
+ }
+]

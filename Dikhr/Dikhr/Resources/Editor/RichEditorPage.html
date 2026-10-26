@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!--
+    Rich editor page for Dikhr's My Athkar feature.
+
+    Derived from RichEditorView (WKWebView rich-text editor) as bundled in
+    Athkar. The JavaScript and stylesheet carry this header verbatim:
+
+        Copyright (C) 2015 Wasabeef
+        Licensed under the Apache License, Version 2.0 (the "License");
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    (The upstream RichEditorView project is distributed under the MIT
+    license; see Resources/Editor/ATTRIBUTION.txt.)
+
+    Page-local differences from the original rich_editor.html:
+    - scripts/stylesheets renamed for Dikhr (RichEditorScript.js,
+      RichEditorStyle.css, RichEditorNormalize.css).
+-->
+<html dir="rtl">
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+        <meta name="supported-color-schemes" content="light dark">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" type="text/css" href="RichEditorNormalize.css">
+        <link rel="stylesheet" type="text/css" href="RichEditorStyle.css">
+    </head>
+
+    <body>
+        <div id="container" dir="rtl">
+            <div id="editor" contentEditable="true" placeholder="" class="placeholder"></div>
+        </div>
+        <script type="text/javascript" src="RichEditorScript.js"></script>
+    </body>
+</html>

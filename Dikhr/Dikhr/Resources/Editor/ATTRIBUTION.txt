@@ -1,0 +1,45 @@
+Dikhr — Resources/Editor/ attribution
+=====================================
+
+The My Athkar rich-text editor in Dikhr is built on the RichEditorView
+WebView editor, copied from the Athkar app bundle
+(/Applications/Athkar.app/Wrapper/athkar.app).
+
+Copied files (renamed so they stay unique inside the Dikhr target):
+
+  rich_editor.js    -> RichEditorScript.js
+  rich_editor.html  -> RichEditorPage.html  (page shell adapted; see comment block)
+  style.css         -> RichEditorStyle.css
+  normalize.css     -> RichEditorNormalize.css
+
+License / copyright as stated in the copied file headers:
+
+  /**
+   * Copyright (C) 2015 Wasabeef
+   *
+   * Licensed under the Apache License, Version 2.0 (the "License");
+   * you may not use this file except in compliance with the License.
+   * You may obtain a copy of the License at
+   *
+   * http://www.apache.org/licenses/LICENSE-2.0
+   *
+   * Unless required by applicable law or agreed to in writing, software
+   * distributed under the License is distributed on an "AS IS" BASIS,
+   * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   * See the License for the specific language governing permissions and
+   * limitations under the License.
+   */
+
+Upstream, this is the RichEditorView editor (github.com/wasabeef/RichEditorView)
+by Wasabeef (Daichi Furiya), distributed under the MIT license:
+
+  Copyright (c) 2015 wasabeef
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction ... (full MIT text:
+  https://opensource.org/licenses/MIT)
+
+RichEditorNormalize.css is normalize.css v8.0.0, MIT license,
+(c) Nicolas Gallagher (github.com/necolas/normalize.css), header kept in file.
+
+No other Athkar assets were copied.

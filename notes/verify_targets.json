@@ -1,0 +1,40 @@
+{
+ "verification queue": {
+  "prayer-times algorithm": [
+   "PrayerTimesEngine",
+   "duha",
+   "qiyamStart",
+   "lastThird"
+  ],
+  "time-moments engine": [
+   "HomeMomentEngine",
+   "TimeMoments"
+  ],
+  "khatmah portions": [
+   "KhatmahStore",
+   "KhatmahPortion"
+  ],
+  "streaks/checkin": [
+   "StreaksStore",
+   "CheckinService",
+   "CheckinStore"
+  ],
+  "iqama/alarms": [
+   "AlarmScheduler",
+   "AlarmManager",
+   "IqamaNotification"
+  ],
+  "athan sound assets": [
+   "AthanSoundStore",
+   "AthanAssetsManager"
+  ],
+  "live counter activity": [
+   "LiveCounterManager",
+   "CounterActivityAttributes"
+  ],
+  "audio scheduling": [
+   "HeaderAudioScheduler",
+   "HeaderAudioPlayer"
+  ]
+ }
+}

@@ -1,0 +1,1815 @@
+{
+  "version": 1,
+  "source": "TimeWidgetSchedule.swift",
+  "mode": "draft",
+  "rules": [
+    {
+      "id": "salawatEvening",
+      "title": {
+        "ar": "الصلاة على النبي ﷺ",
+        "en": "Blessings upon the Prophet ﷺ"
+      },
+      "detail": {
+        "ar": "صَلُّوا عَلَيْهِ وَسَلِّمُوا تَسْلِيمًا",
+        "en": ""
+      },
+      "widgetDetail": {
+        "ar": "",
+        "en": ""
+      },
+      "icon": "heart.text.clipboard",
+      "start": {
+        "anchor": "maghrib",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "nextFajr",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 55,
+      "destination": "salawat",
+      "group": "weekly",
+      "days": [
+        4
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": true,
+      "notes": "",
+      "soonLabel": {
+        "ar": "ليلة الجمعة",
+        "en": ""
+      },
+      "activeLabel": {
+        "ar": "ليلة الجمعة",
+        "en": ""
+      }
+    },
+    {
+      "id": "salawatDawn",
+      "title": {
+        "ar": "الصلاة على النبي ﷺ",
+        "en": "Blessings upon the Prophet ﷺ"
+      },
+      "detail": {
+        "ar": "",
+        "en": ""
+      },
+      "widgetDetail": {
+        "ar": "",
+        "en": ""
+      },
+      "icon": "heart.text.clipboard",
+      "start": {
+        "anchor": "fajr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "sunrise",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 55,
+      "destination": "salawat",
+      "group": "weekly",
+      "days": [
+        5
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": true,
+      "notes": "",
+      "activeLabel": {
+        "ar": "الجمعة",
+        "en": ""
+      }
+    },
+    {
+      "id": "friday",
+      "title": {
+        "ar": "الجمعة",
+        "en": "Friday"
+      },
+      "detail": {
+        "ar": "سنن الجمعة",
+        "en": "Friday practices"
+      },
+      "widgetDetail": {
+        "ar": "سنن الجمعة",
+        "en": "Friday practices"
+      },
+      "icon": "calendar",
+      "start": {
+        "anchor": "sunrise",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "dhuhr",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 75,
+      "destination": "friday",
+      "group": "weekly",
+      "days": [
+        5
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": true,
+      "notes": "",
+      "activeLabel": {
+        "ar": "اليوم",
+        "en": "Today"
+      },
+      "soonLabel": {
+        "ar": "اليوم",
+        "en": ""
+      }
+    },
+    {
+      "id": "salawatAfternoon",
+      "title": {
+        "ar": "الصلاة على النبي ﷺ",
+        "en": "Blessings upon the Prophet ﷺ"
+      },
+      "detail": {
+        "ar": "",
+        "en": ""
+      },
+      "widgetDetail": {
+        "ar": "",
+        "en": ""
+      },
+      "icon": "heart.text.clipboard",
+      "start": {
+        "anchor": "asr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "maghrib",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 55,
+      "destination": "salawat",
+      "group": "weekly",
+      "days": [
+        5
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": true,
+      "notes": "",
+      "activeLabel": {
+        "ar": "اليوم",
+        "en": "Today"
+      },
+      "laterLabel": {
+        "ar": "اليوم",
+        "en": ""
+      },
+      "soonLabel": {
+        "ar": "اليوم",
+        "en": ""
+      }
+    },
+    {
+      "id": "morning",
+      "title": {
+        "ar": "أذكار الصباح",
+        "en": "Morning Athkar"
+      },
+      "detail": {
+        "ar": "ابدأ يومك بذكر الله",
+        "en": "Begin your day with remembrance of Allah"
+      },
+      "widgetDetail": {
+        "ar": "ابدأ بالذكر",
+        "en": "Start with dhikr"
+      },
+      "icon": "sunrise.fill",
+      "start": {
+        "anchor": "fajr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "dhuhr",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 50,
+      "destination": "morning",
+      "group": "daily",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": "athkarMorning",
+      "upcoming": true,
+      "notes": ""
+    },
+    {
+      "id": "evening",
+      "title": {
+        "ar": "أذكار المساء",
+        "en": "Evening Athkar"
+      },
+      "detail": {
+        "ar": "اختم نهارك بذكر الله",
+        "en": "End your day with remembrance of Allah"
+      },
+      "widgetDetail": {
+        "ar": "اختم بالذكر",
+        "en": "End with dhikr"
+      },
+      "icon": "sunset.fill",
+      "start": {
+        "anchor": "asr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "maghrib",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 50,
+      "destination": "evening",
+      "group": "daily",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": "athkarEvening",
+      "upcoming": true,
+      "notes": ""
+    },
+    {
+      "id": "sleep",
+      "title": {
+        "ar": "أذكار النوم",
+        "en": "Sleep Athkar"
+      },
+      "detail": {
+        "ar": "اقرأها عند النوم",
+        "en": "Read before sleeping"
+      },
+      "widgetDetail": {
+        "ar": "عند النوم",
+        "en": "At bedtime"
+      },
+      "icon": "bed.double.fill",
+      "start": {
+        "anchor": "isha",
+        "offset": 40
+      },
+      "end": {
+        "anchor": "nextFajr",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 40,
+      "destination": "sleep",
+      "group": "daily",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": "athkarSleep",
+      "upcoming": true,
+      "notes": ""
+    },
+    {
+      "id": "duha",
+      "title": {
+        "ar": "وقت الضحى",
+        "en": ""
+      },
+      "detail": {
+        "ar": "صلاة الأوابين",
+        "en": "Salat al-Awwabin"
+      },
+      "widgetDetail": {
+        "ar": "صلاة الأوابين",
+        "en": "Salat al-Awwabin"
+      },
+      "icon": "sun.max.fill",
+      "start": {
+        "anchor": "sunrise",
+        "offset": 20
+      },
+      "end": {
+        "anchor": "dhuhr",
+        "offset": -10,
+        "cap": null
+      },
+      "priority": 60,
+      "destination": "dhuha",
+      "group": "daily",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": "duha",
+      "completionKey": "duha",
+      "upcoming": true,
+      "notes": ""
+    },
+    {
+      "id": "prayer0",
+      "title": {
+        "ar": "صلاة الفجر",
+        "en": "Fajr"
+      },
+      "detail": {
+        "ar": "",
+        "en": ""
+      },
+      "widgetDetail": {
+        "ar": "",
+        "en": ""
+      },
+      "icon": "sunrise.fill",
+      "start": {
+        "anchor": "fajr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama0",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 100,
+      "destination": "prayerTimes",
+      "group": "prayer",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": "prayerFajr",
+      "upcoming": true,
+      "notes": ""
+    },
+    {
+      "id": "after0",
+      "title": {
+        "ar": "أذكار بعد الصلاة",
+        "en": "After Prayers"
+      },
+      "detail": {
+        "ar": "بعد صلاة الفجر",
+        "en": "After Fajr prayer"
+      },
+      "widgetDetail": {
+        "ar": "بعد الفجر",
+        "en": "After Fajr"
+      },
+      "icon": "hands.sparkles.fill",
+      "start": {
+        "anchor": "iqama0",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama0",
+        "offset": 15,
+        "cap": "sunrise"
+      },
+      "priority": 90,
+      "destination": "after_prayer",
+      "group": "prayer",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "notes": ""
+    },
+    {
+      "id": "before0",
+      "title": {
+        "ar": "سنة الفجر القبلية",
+        "en": "Sunnah before Fajr"
+      },
+      "detail": {
+        "ar": "ركعتان قبل الفريضة",
+        "en": "Two rak‘ahs before the obligatory prayer"
+      },
+      "widgetDetail": {
+        "ar": "ركعتان",
+        "en": "Two rakʿahs"
+      },
+      "icon": "sparkles",
+      "start": {
+        "anchor": "fajr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama0",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 80,
+      "destination": "rawatib",
+      "group": "sunnah",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": "rawatib",
+      "completionKey": "sunnahFajr",
+      "upcoming": false,
+      "notes": ""
+    },
+    {
+      "id": "prayer1",
+      "title": {
+        "ar": "صلاة الظهر",
+        "en": "Dhuhr"
+      },
+      "detail": {
+        "ar": "",
+        "en": ""
+      },
+      "widgetDetail": {
+        "ar": "",
+        "en": ""
+      },
+      "icon": "sun.max.fill",
+      "start": {
+        "anchor": "dhuhr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama1",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 100,
+      "destination": "prayerTimes",
+      "group": "prayer",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": "prayerDhuhr",
+      "upcoming": true,
+      "notes": ""
+    },
+    {
+      "id": "after1",
+      "title": {
+        "ar": "أذكار بعد الصلاة",
+        "en": "After Prayers"
+      },
+      "detail": {
+        "ar": "بعد صلاة الظهر",
+        "en": "After Dhuhr prayer"
+      },
+      "widgetDetail": {
+        "ar": "بعد الظهر",
+        "en": "After Dhuhr"
+      },
+      "icon": "hands.sparkles.fill",
+      "start": {
+        "anchor": "iqama1",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama1",
+        "offset": 15,
+        "cap": "asr"
+      },
+      "priority": 90,
+      "destination": "after_prayer",
+      "group": "prayer",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "notes": ""
+    },
+    {
+      "id": "before1",
+      "title": {
+        "ar": "سنة الظهر القبلية",
+        "en": "Dhuhr Sunnah (Before)"
+      },
+      "detail": {
+        "ar": "أربع ركعات قبل الفريضة",
+        "en": "Four rak‘ahs before the obligatory prayer"
+      },
+      "widgetDetail": {
+        "ar": "أربع ركعات",
+        "en": "Four rakʿahs"
+      },
+      "icon": "sparkles",
+      "start": {
+        "anchor": "dhuhr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama1",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 80,
+      "destination": "rawatib",
+      "group": "sunnah",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": "rawatib",
+      "completionKey": "sunnahDhuhr",
+      "upcoming": false,
+      "notes": ""
+    },
+    {
+      "id": "rawatib1",
+      "title": {
+        "ar": "سنة الظهر البعدية",
+        "en": "Dhuhr Sunnah (After)"
+      },
+      "detail": {
+        "ar": "ركعتان بعد الفريضة",
+        "en": "Two rak‘ahs after the obligatory prayer"
+      },
+      "widgetDetail": {
+        "ar": "ركعتان",
+        "en": "Two rakʿahs"
+      },
+      "icon": "sparkles",
+      "start": {
+        "anchor": "iqama1",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama1",
+        "offset": 40,
+        "cap": "asr"
+      },
+      "priority": 80,
+      "destination": "rawatib",
+      "group": "sunnah",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": "rawatib",
+      "completionKey": "sunnahDhuhrAfter",
+      "upcoming": false,
+      "notes": ""
+    },
+    {
+      "id": "prayer2",
+      "title": {
+        "ar": "صلاة العصر",
+        "en": "Asr"
+      },
+      "detail": {
+        "ar": "",
+        "en": ""
+      },
+      "widgetDetail": {
+        "ar": "",
+        "en": ""
+      },
+      "icon": "cloud.sun.fill",
+      "start": {
+        "anchor": "asr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama2",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 100,
+      "destination": "prayerTimes",
+      "group": "prayer",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": "prayerAsr",
+      "upcoming": true,
+      "notes": ""
+    },
+    {
+      "id": "after2",
+      "title": {
+        "ar": "أذكار بعد الصلاة",
+        "en": "After Prayers"
+      },
+      "detail": {
+        "ar": "بعد صلاة العصر",
+        "en": "After Asr prayer"
+      },
+      "widgetDetail": {
+        "ar": "بعد العصر",
+        "en": "After Asr"
+      },
+      "icon": "hands.sparkles.fill",
+      "start": {
+        "anchor": "iqama2",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama2",
+        "offset": 15,
+        "cap": "maghrib"
+      },
+      "priority": 90,
+      "destination": "after_prayer",
+      "group": "prayer",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "notes": ""
+    },
+    {
+      "id": "prayer3",
+      "title": {
+        "ar": "صلاة المغرب",
+        "en": "Maghrib"
+      },
+      "detail": {
+        "ar": "",
+        "en": ""
+      },
+      "widgetDetail": {
+        "ar": "",
+        "en": ""
+      },
+      "icon": "sunset.fill",
+      "start": {
+        "anchor": "maghrib",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama3",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 100,
+      "destination": "prayerTimes",
+      "group": "prayer",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": "prayerMaghrib",
+      "upcoming": true,
+      "notes": ""
+    },
+    {
+      "id": "after3",
+      "title": {
+        "ar": "أذكار بعد الصلاة",
+        "en": "After Prayers"
+      },
+      "detail": {
+        "ar": "بعد صلاة المغرب",
+        "en": "After Maghrib prayer"
+      },
+      "widgetDetail": {
+        "ar": "بعد المغرب",
+        "en": "After Maghrib"
+      },
+      "icon": "hands.sparkles.fill",
+      "start": {
+        "anchor": "iqama3",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama3",
+        "offset": 15,
+        "cap": "isha"
+      },
+      "priority": 90,
+      "destination": "after_prayer",
+      "group": "prayer",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "notes": ""
+    },
+    {
+      "id": "rawatib3",
+      "title": {
+        "ar": "سنة المغرب البعدية",
+        "en": "Sunnah after Maghrib"
+      },
+      "detail": {
+        "ar": "ركعتان بعد الفريضة",
+        "en": "Two rak‘ahs after the obligatory prayer"
+      },
+      "widgetDetail": {
+        "ar": "ركعتان",
+        "en": "Two rakʿahs"
+      },
+      "icon": "sparkles",
+      "start": {
+        "anchor": "iqama3",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama3",
+        "offset": 40,
+        "cap": "isha"
+      },
+      "priority": 80,
+      "destination": "rawatib",
+      "group": "sunnah",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": "rawatib",
+      "completionKey": "sunnahMaghrib",
+      "upcoming": false,
+      "notes": ""
+    },
+    {
+      "id": "prayer4",
+      "title": {
+        "ar": "صلاة العشاء",
+        "en": "Isha"
+      },
+      "detail": {
+        "ar": "",
+        "en": ""
+      },
+      "widgetDetail": {
+        "ar": "",
+        "en": ""
+      },
+      "icon": "moon.stars.fill",
+      "start": {
+        "anchor": "isha",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama4",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 100,
+      "destination": "prayerTimes",
+      "group": "prayer",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": "prayerEisha",
+      "upcoming": true,
+      "notes": ""
+    },
+    {
+      "id": "after4",
+      "title": {
+        "ar": "أذكار بعد الصلاة",
+        "en": "After Prayers"
+      },
+      "detail": {
+        "ar": "بعد صلاة العشاء",
+        "en": "After Isha prayer"
+      },
+      "widgetDetail": {
+        "ar": "بعد العشاء",
+        "en": "After Isha"
+      },
+      "icon": "hands.sparkles.fill",
+      "start": {
+        "anchor": "iqama4",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama4",
+        "offset": 15,
+        "cap": "nextFajr"
+      },
+      "priority": 90,
+      "destination": "after_prayer",
+      "group": "prayer",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "notes": ""
+    },
+    {
+      "id": "rawatib4",
+      "title": {
+        "ar": "سنة العشاء البعدية",
+        "en": "Sunnah after Isha"
+      },
+      "detail": {
+        "ar": "ركعتان بعد الفريضة",
+        "en": "Two rak‘ahs after the obligatory prayer"
+      },
+      "widgetDetail": {
+        "ar": "ركعتان",
+        "en": "Two rakʿahs"
+      },
+      "icon": "sparkles",
+      "start": {
+        "anchor": "iqama4",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "iqama4",
+        "offset": 40,
+        "cap": "nextFajr"
+      },
+      "priority": 80,
+      "destination": "rawatib",
+      "group": "sunnah",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": "rawatib",
+      "completionKey": "sunnahIsha",
+      "upcoming": false,
+      "notes": ""
+    },
+    {
+      "id": "nightWake",
+      "title": {
+        "ar": "دعاء من تعار من الليل",
+        "en": "Supplication when waking at night"
+      },
+      "detail": {
+        "ar": "عند الاستيقاظ ليلاً",
+        "en": "When waking at night"
+      },
+      "widgetDetail": {
+        "ar": "عند الاستيقاظ",
+        "en": "On waking"
+      },
+      "icon": "moon.zzz.fill",
+      "start": {
+        "anchor": "clockMidnight",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "nextFajr",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 35,
+      "destination": "nightWake",
+      "group": "night",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": "night",
+      "completionKey": null,
+      "upcoming": false,
+      "notes": ""
+    },
+    {
+      "id": "middle",
+      "title": {
+        "ar": "منتصف الليل",
+        "en": "Midnight"
+      },
+      "detail": {
+        "ar": "منتصف ما بين المغرب والفجر",
+        "en": "Halfway between Maghrib and Fajr"
+      },
+      "widgetDetail": {
+        "ar": "نصف الليل الشرعي",
+        "en": "Midpoint of night"
+      },
+      "icon": "moon.fill",
+      "start": {
+        "anchor": "nightMiddle",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "lastThird",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 65,
+      "destination": "midnight",
+      "group": "night",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": "night",
+      "completionKey": null,
+      "upcoming": true,
+      "notes": ""
+    },
+    {
+      "id": "third",
+      "title": {
+        "ar": "الثلث الأخير",
+        "en": "Qiyam"
+      },
+      "detail": {
+        "ar": "وقت القيام والدعاء",
+        "en": "Time for night prayer and supplication"
+      },
+      "widgetDetail": {
+        "ar": "قيام ودعاء",
+        "en": "Prayer & duaa"
+      },
+      "icon": "moon.stars.fill",
+      "start": {
+        "anchor": "lastThird",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "nextFajr",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 70,
+      "destination": "qiyam",
+      "group": "night",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": "night",
+      "completionKey": "qiyam",
+      "upcoming": true,
+      "notes": ""
+    },
+    {
+      "id": "custom1",
+      "title": {
+        "ar": "ساعة الإجابة",
+        "en": "Hour of response"
+      },
+      "detail": {
+        "ar": "أكثر من الدعاء",
+        "en": "Make time for duaa"
+      },
+      "widgetDetail": {
+        "ar": "",
+        "en": ""
+      },
+      "icon": "hands.sparkles",
+      "start": {
+        "anchor": "maghrib",
+        "offset": -60
+      },
+      "end": {
+        "anchor": "maghrib",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 50,
+      "destination": "ijabaHour",
+      "group": "custom",
+      "days": [
+        5
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": true,
+      "notes": "Friday reminder before Maghrib; opens the dedicated hour-of-response page."
+    },
+    {
+      "id": "ramadanIftar",
+      "title": {
+        "ar": "وقت الإفطار",
+        "en": "Iftar time"
+      },
+      "detail": {
+        "ar": "الإفطار عند أذان المغرب",
+        "en": "Break the fast at Maghrib"
+      },
+      "widgetDetail": {
+        "ar": "الإفطار عند أذان المغرب",
+        "en": "Break the fast at Maghrib"
+      },
+      "icon": "sunset.fill",
+      "start": {
+        "anchor": "maghrib",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "maghrib",
+        "offset": 15,
+        "cap": "isha"
+      },
+      "priority": 95,
+      "destination": "iftar",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "condition": "ramadanToday",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation."
+    },
+    {
+      "id": "ramadanSuhoor",
+      "title": {
+        "ar": "السحور",
+        "en": "Suhoor"
+      },
+      "detail": {
+        "ar": "ينتهي وقت السحور عند الفجر",
+        "en": "Suhoor ends at Fajr"
+      },
+      "widgetDetail": {
+        "ar": "ينتهي وقت السحور عند الفجر",
+        "en": "Suhoor ends at Fajr"
+      },
+      "icon": "moon.stars.fill",
+      "start": {
+        "anchor": "nextFajr",
+        "offset": -60
+      },
+      "end": {
+        "anchor": "nextFajr",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 85,
+      "destination": "suhoor",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": true,
+      "condition": "ramadanTomorrow",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation."
+    },
+    {
+      "id": "fastingTomorrow",
+      "title": {
+        "ar": "تذكير بصيام الغد",
+        "en": "Fasting tomorrow"
+      },
+      "detail": {
+        "ar": "غدًا من أيام الصيام المستحب",
+        "en": "Tomorrow is a recommended fasting day"
+      },
+      "widgetDetail": {
+        "ar": "غدًا من أيام الصيام المستحب",
+        "en": "Tomorrow is a recommended fasting day"
+      },
+      "icon": "calendar",
+      "start": {
+        "anchor": "maghrib",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "isha",
+        "offset": 120,
+        "cap": "nextFajr"
+      },
+      "priority": 55,
+      "destination": "dailyTasks",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "condition": "voluntaryFastTomorrow",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation."
+    },
+    {
+      "id": "mondayToday",
+      "title": {
+        "ar": "صيام الاثنين",
+        "en": "Monday fasting"
+      },
+      "detail": {
+        "ar": "",
+        "en": "Today"
+      },
+      "widgetDetail": {
+        "ar": "اليوم",
+        "en": "Today"
+      },
+      "icon": "calendar",
+      "start": {
+        "anchor": "fajr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "maghrib",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 55,
+      "destination": "fastMonday",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": false,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "condition": "mondayToday",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation.",
+      "activeLabel": {
+        "ar": "اليوم",
+        "en": "Today"
+      }
+    },
+    {
+      "id": "mondayTomorrow",
+      "title": {
+        "ar": "صيام الاثنين",
+        "en": "Monday fasting"
+      },
+      "detail": {
+        "ar": "غدًا",
+        "en": "Tomorrow"
+      },
+      "widgetDetail": {
+        "ar": "غدًا",
+        "en": "Tomorrow"
+      },
+      "icon": "calendar",
+      "start": {
+        "anchor": "maghrib",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "isha",
+        "offset": 120,
+        "cap": "nextFajr"
+      },
+      "priority": 55,
+      "destination": "fastMonday",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "condition": "mondayTomorrow",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation.",
+      "activeLabel": {
+        "ar": "تذكير",
+        "en": "Reminder"
+      }
+    },
+    {
+      "id": "thursdayToday",
+      "title": {
+        "ar": "صيام الخميس",
+        "en": "Thursday fasting"
+      },
+      "detail": {
+        "ar": "اليوم",
+        "en": "Today"
+      },
+      "widgetDetail": {
+        "ar": "اليوم",
+        "en": "Today"
+      },
+      "icon": "calendar",
+      "start": {
+        "anchor": "fajr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "maghrib",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 55,
+      "destination": "fastThursday",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": false,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "condition": "thursdayToday",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation."
+    },
+    {
+      "id": "thursdayTomorrow",
+      "title": {
+        "ar": "صيام الخميس",
+        "en": "Thursday fasting"
+      },
+      "detail": {
+        "ar": "غدًا",
+        "en": "Tomorrow"
+      },
+      "widgetDetail": {
+        "ar": "غدًا",
+        "en": "Tomorrow"
+      },
+      "icon": "calendar",
+      "start": {
+        "anchor": "maghrib",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "isha",
+        "offset": 120,
+        "cap": "nextFajr"
+      },
+      "priority": 55,
+      "destination": "fastThursday",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "condition": "thursdayTomorrow",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation.",
+      "activeLabel": {
+        "ar": "تذكير",
+        "en": "Reminder"
+      }
+    },
+    {
+      "id": "arafahToday",
+      "title": {
+        "ar": "يوم عرفة",
+        "en": "Day of Arafah"
+      },
+      "detail": {
+        "ar": "اليوم",
+        "en": "Today"
+      },
+      "widgetDetail": {
+        "ar": "الحج عرفة",
+        "en": "Today"
+      },
+      "icon": "calendar",
+      "start": {
+        "anchor": "fajr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "maghrib",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 55,
+      "destination": "arafah",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "condition": "arafahToday",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation.",
+      "activeLabel": {
+        "ar": "اليوم",
+        "en": "Today"
+      }
+    },
+    {
+      "id": "arafahTomorrow",
+      "title": {
+        "ar": "يوم عرفة",
+        "en": "Day of Arafah"
+      },
+      "detail": {
+        "ar": "غدًا",
+        "en": "Tomorrow"
+      },
+      "widgetDetail": {
+        "ar": "",
+        "en": "Tomorrow"
+      },
+      "icon": "calendar",
+      "start": {
+        "anchor": "maghrib",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "isha",
+        "offset": 120,
+        "cap": "nextFajr"
+      },
+      "priority": 55,
+      "destination": "arafah",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "condition": "arafahTomorrow",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation.",
+      "activeLabel": {
+        "ar": "غدًا",
+        "en": ""
+      }
+    },
+    {
+      "id": "ashuraToday",
+      "title": {
+        "ar": "يوم عاشورا",
+        "en": "Day of Ashura"
+      },
+      "detail": {
+        "ar": "اليوم",
+        "en": "Today"
+      },
+      "widgetDetail": {
+        "ar": "اليوم",
+        "en": "Today"
+      },
+      "icon": "calendar",
+      "start": {
+        "anchor": "fajr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "maghrib",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 55,
+      "destination": "ashura",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "condition": "ashuraToday",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation."
+    },
+    {
+      "id": "ashuraTomorrow",
+      "title": {
+        "ar": "يوم عاشورا",
+        "en": "Day of Ashura"
+      },
+      "detail": {
+        "ar": "غدًا",
+        "en": "Tomorrow"
+      },
+      "widgetDetail": {
+        "ar": "غدًا",
+        "en": "Tomorrow"
+      },
+      "icon": "calendar",
+      "start": {
+        "anchor": "maghrib",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "isha",
+        "offset": 120,
+        "cap": "nextFajr"
+      },
+      "priority": 55,
+      "destination": "ashura",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "condition": "ashuraTomorrow",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation."
+    },
+    {
+      "id": "whiteDaysToday",
+      "title": {
+        "ar": "صيام الأيام البيض",
+        "en": "White days fasting"
+      },
+      "detail": {
+        "ar": "اليوم",
+        "en": "Today"
+      },
+      "widgetDetail": {
+        "ar": "اليوم",
+        "en": "Today"
+      },
+      "icon": "calendar",
+      "start": {
+        "anchor": "fajr",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "maghrib",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 55,
+      "destination": "whiteDays",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "condition": "whiteDaysToday",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation.",
+      "activeLabel": {
+        "ar": "اليوم",
+        "en": "Today"
+      }
+    },
+    {
+      "id": "whiteDaysTomorrow",
+      "title": {
+        "ar": "صيام الأيام البيض",
+        "en": "White days fasting"
+      },
+      "detail": {
+        "ar": "غدًا",
+        "en": "Tomorrow"
+      },
+      "widgetDetail": {
+        "ar": "غدًا",
+        "en": "Tomorrow"
+      },
+      "icon": "calendar",
+      "start": {
+        "anchor": "maghrib",
+        "offset": 0
+      },
+      "end": {
+        "anchor": "isha",
+        "offset": 120,
+        "cap": "nextFajr"
+      },
+      "priority": 55,
+      "destination": "whiteDays",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "condition": "whiteDaysTomorrow",
+      "notes": "Optional: controlled by Time Moment settings and the app fasting calendar. Studio eligibility is a manual simulation.",
+      "activeLabel": {
+        "ar": "تذكير",
+        "en": "Reminder"
+      }
+    },
+    {
+      "id": "ramadanDuaa",
+      "title": {
+        "ar": "الدعاء قبل الإفطار",
+        "en": "Duaa before Iftar"
+      },
+      "detail": {
+        "ar": "اغتنم ما قبل الإفطار بالدعاء",
+        "en": "Take a moment for duaa before Iftar"
+      },
+      "widgetDetail": {
+        "ar": "قبل أذان المغرب",
+        "en": "Before Maghrib"
+      },
+      "icon": "sunset.fill",
+      "start": {
+        "anchor": "maghrib",
+        "offset": -30
+      },
+      "end": {
+        "anchor": "maghrib",
+        "offset": 0,
+        "cap": "isha"
+      },
+      "priority": 95,
+      "destination": "beforeIftar",
+      "group": "seasonal",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": true,
+      "condition": "ramadanToday",
+      "notes": "Calendar eligibility follows the selected Hijri day. Fasting moments appear automatically; Ramadan moments use the Ramadan setting in the app."
+    },
+    {
+      "id": "quranAfternoon",
+      "title": {
+        "ar": "قراءة القرآن",
+        "en": "Read Quran"
+      },
+      "detail": {
+        "ar": "اقرأ ما تيسر من القرآن",
+        "en": "Read what you can of the Quran"
+      },
+      "widgetDetail": {
+        "ar": "اقرأ ما تيسر",
+        "en": "Read a little Quran"
+      },
+      "icon": "book.closed",
+      "start": {
+        "anchor": "iqama1",
+        "offset": 40
+      },
+      "end": {
+        "anchor": "asr",
+        "offset": 0,
+        "cap": null
+      },
+      "priority": 10,
+      "destination": "quran",
+      "group": "daily",
+      "days": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "enabled": true,
+      "setting": null,
+      "completionKey": null,
+      "upcoming": false,
+      "notes": "A general reading opportunity between the post-Dhuhr reminders and Asr; this display window does not prescribe a special time for recitation."
+    }
+  ]
+}

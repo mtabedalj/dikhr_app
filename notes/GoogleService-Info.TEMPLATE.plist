@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>REPLACE_WITH_YOUR_API_KEY</string>
+	<key>BUNDLE_ID</key>
+	<string>dev.dikhr.app</string>
+	<key>GCM_SENDER_ID</key>
+	<string>REPLACE_WITH_YOUR_SENDER_ID</string>
+	<key>GOOGLE_APP_ID</key>
+	<string>REPLACE_WITH_YOUR_APP_ID</string>
+	<key>IS_ADS_ENABLED</key>
+	<string>No</string>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<string>Yes</string>
+	<key>IS_APPSIGNER_ENABLED</key>
+	<string>Yes</string>
+	<key>IS_MEASUREMENT_ENABLED</key>
+	<string>Yes</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>PROJECT_ID</key>
+	<string>REPLACE_WITH_YOUR_PROJECT_ID</string>
+	<key>REPLACE-WITH-YOUR-PROJECT-VALUES</key>
+	<string>https://console.firebase.google.com → project settings → Apple app</string>
+	<key>STORAGE_BUCKET</key>
+	<string>REPLACE_WITH_YOUR_BUCKET</string>
+</dict>
+</plist>
