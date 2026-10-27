@@ -549,8 +549,12 @@ struct AthkarCategoryListView: View {
         stripEvents.next.map { ($0.kind, $0.date) }
     }
 
+    /// Under one hour the original renders mm:ss ("31:00"), otherwise h:mm:ss.
     private func hms(_ interval: TimeInterval) -> String {
         let s = max(0, Int(interval))
+        if s < 3600 {
+            return String(format: "%02d:%02d", s / 60, s % 60)
+        }
         return String(format: "%d:%02d:%02d", s / 3600, (s % 3600) / 60, s % 60)
     }
 
