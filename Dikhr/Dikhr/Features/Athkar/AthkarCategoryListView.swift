@@ -134,7 +134,7 @@ struct AthkarCategoryListView: View {
                 case "favorites": AthkarFavoritesView()
                 case "followupPage": AthkarFollowupView()
                 case "search": AthkarSearchPageView()
-                case "more": AthkarSectionsListView()
+                case "more": AthkarMoreGridPage()
                 case "adhanHistory": AdhanHistoryView()
                 default: AthkarSearchPageView()
                 }
@@ -1393,7 +1393,8 @@ private struct AthkarSearchMushafPage: View {
     }
 }
 
-/// المزيد — one flat list of every athkar route + section.
+/// (Legacy: the flat المزيد list. Superseded by AthkarMoreGridPage, the
+/// capture-verified two-column tinted card grid; kept for reference.)
 struct AthkarSectionsListView: View {
     @EnvironmentObject private var settings: SettingsStore
     @State private var categories: [AthkarCategory] = []
