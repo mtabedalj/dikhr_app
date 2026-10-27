@@ -1,5 +1,6 @@
 import SwiftUI
 import CoreLocation
+import MapKit
 import CoreMotion
 
 @MainActor
@@ -92,9 +93,12 @@ struct QiblaView: View {
     @EnvironmentObject private var settings: SettingsStore
     @StateObject private var controller = QiblaController()
     @Environment(\.dismiss) private var dismiss
+    // Bumped by the bottom button to re-fit the map on the location.
+    @State private var fitToken = 0
 
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 0) {
+            topBar
             if controller.denied {
                 VStack(spacing: 12) {
                     Image(systemName: "location.slash.fill")
@@ -110,17 +114,89 @@ struct QiblaView: View {
                     .buttonStyle(.borderedProminent)
                 }
                 .padding()
+                .frame(maxHeight: .infinity)
+            } else if CLLocationManager.headingAvailable() {
+                VStack(spacing: 20) {
+                    dial
+                    degreesReadout
+                }
+                .padding()
+                .frame(maxHeight: .infinity)
             } else {
-                dial
-                degreesReadout
+                // Live capture (/tmp/athkar_live_6b.png — REAL app's قِبلة page
+                // on a compass-less device): dark map + green bearing ray +
+                // verbatim disclaimer + black bottom bar.
+                mapFallback
             }
-            Spacer(minLength: 0)
         }
-        .padding()
-        .navigationTitle(settings.t("اتجاه القبلة", "Qibla Direction"))
-        .navigationBarTitleDisplayMode(.inline)
+        .background(Color.black.ignoresSafeArea())
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear { controller.start() }
         .onDisappear { controller.stop() }
+    }
+
+    // MARK: top bar — centered white title + top-right dark round back chevron
+    // (same style as AthkarSalahPageView's back button; the bar itself is
+    // pinned LTR so the chevron lands at the right edge like the capture).
+
+    private var topBar: some View {
+        ZStack {
+            Text(settings.t("القبلة", "Qibla"))
+                .font(.system(size: 24, weight: .bold))
+                .foregroundStyle(.white)
+            HStack {
+                Spacer()
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.forward")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 40, height: 40)
+                        .background(Circle().fill(Color.white.opacity(0.10)))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .environment(\.layoutDirection, .leftToRight)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 8)
+    }
+
+    // MARK: no-compass fallback — dark map with the qibla ray
+
+    /// Current location, falling back to the selected city so the page still
+    /// works before (or without) a location fix.
+    private var fallbackCoordinate: CLLocationCoordinate2D {
+        controller.location?.coordinate
+            ?? CLLocationCoordinate2D(latitude: DikhrShared.city.lat, longitude: DikhrShared.city.lng)
+    }
+
+    private var mapFallback: some View {
+        VStack(spacing: 0) {
+            Text(settings.t("هذا الجهاز لا يدعم البوصلة. استخدم الخريطة لمعرفة اتجاه مكة.",
+                            "This device has no compass. Use the map to find the direction of Makkah."))
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(Color(red: 0.92, green: 0.90, blue: 0.85))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 14)
+                .padding(.bottom, 6)
+                .frame(maxWidth: .infinity)
+            QiblaMapView(coordinate: fallbackCoordinate,
+                         bearing: controller.qiblaBearing,
+                         fitToken: fitToken)
+                .frame(maxWidth: .infinity)
+                .frame(maxHeight: .infinity)
+            Button {
+                fitToken += 1
+            } label: {
+                Text(settings.t("عرض الاتجاه إلى مكة", "Show direction to Makkah"))
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 14)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.black)
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     private var dial: some View {
@@ -182,6 +258,145 @@ struct QiblaView: View {
             .foregroundStyle(.secondary)
         }
     }
+}
+
+// MARK: - no-compass map (dark MKMapView + bearing ray + location disc)
+//
+// Live capture ground truth (/tmp/athkar_live_6b.png — the REAL app's qibla
+// page reached from the athkar home's القبلة chip, without a working compass):
+//   - dark-style Apple Map showing the current area (Dearborn Heights here),
+//     rendered by the system MKMapView itself (system attribution/legal text).
+//   - a translucent gray circle outline (~55pt) with a small gray dot at its
+//     center marking the location.
+//   - a bright green ~4pt line from the location toward Makkah — the qibla
+//     bearing ray drawn on the map (straight segment long enough to cover the
+//     screen).
+//   - bottom black bar with centered bold white "عرض الاتجاه إلى مكة", a tap
+//     action that recenters the map + re-fits the ray.
+
+/// MapKit annotation for Dikhr's own gray circle-with-dot location marker.
+final class QiblaLocationAnnotation: MKPointAnnotation {}
+
+final class QiblaLocationAnnotationView: MKAnnotationView {
+
+    override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
+        super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
+        frame = CGRect(x: 0, y: 0, width: 55, height: 55)
+        isOpaque = false
+    }
+
+    required init?(coder: NSCoder) { fatalError("not used") }
+
+    override func draw(_ rect: CGRect) {
+        guard let ctx = UIGraphicsGetCurrentContext() else { return }
+        let circle = rect.insetBy(dx: 1.5, dy: 1.5)
+        // Translucent gray disc fill + lighter gray outline.
+        ctx.setFillColor(UIColor(white: 0.72, alpha: 0.18).cgColor)
+        ctx.fillEllipse(in: circle)
+        ctx.setStrokeColor(UIColor(white: 0.85, alpha: 0.55).cgColor)
+        ctx.setLineWidth(3)
+        ctx.strokeEllipse(in: circle)
+        // Small gray dot at the center with a light ring.
+        let dot = CGRect(x: rect.midX - 7, y: rect.midY - 7, width: 14, height: 14)
+        ctx.setFillColor(UIColor(white: 0.42, alpha: 1).cgColor)
+        ctx.fillEllipse(in: dot)
+        ctx.setStrokeColor(UIColor(white: 0.92, alpha: 0.8).cgColor)
+        ctx.setLineWidth(2)
+        ctx.strokeEllipse(in: dot.insetBy(dx: -1, dy: -1))
+    }
+}
+
+private struct QiblaMapView: UIViewRepresentable {
+    let coordinate: CLLocationCoordinate2D
+    let bearing: Double
+    let fitToken: Int
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    final class Coordinator: NSObject, MKMapViewDelegate {
+        var installed: CLLocationCoordinate2D?
+        var lastFitToken = -1
+
+        func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+            guard let line = overlay as? MKPolyline else {
+                return MKOverlayRenderer(overlay: overlay)
+            }
+            let r = MKPolylineRenderer(polyline: line)
+            r.strokeColor = UIColor(red: 0.16, green: 0.82, blue: 0.28, alpha: 1)
+            r.lineWidth = 4
+            r.lineCap = .round
+            return r
+        }
+
+        func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+            guard annotation is QiblaLocationAnnotation else { return nil }
+            return QiblaLocationAnnotationView(annotation: annotation, reuseIdentifier: "QiblaLocation")
+        }
+
+        func install(on map: MKMapView, coordinate: CLLocationCoordinate2D, bearing: Double) {
+            map.removeOverlays(map.overlays)
+            map.removeAnnotations(map.annotations)
+            // Straight great-circle segment (300 km) covering the visible screen.
+            let dest = destinationCoordinate(from: coordinate, bearingDeg: bearing,
+                                             distanceMeters: 300_000)
+            let ray = MKGeodesicPolyline(coordinates: [coordinate, dest], count: 2)
+            map.addOverlay(ray, level: .aboveRoads)
+            let marker = QiblaLocationAnnotation()
+            marker.coordinate = coordinate
+            map.addAnnotation(marker)
+            setRegion(on: map, coordinate: coordinate)
+            installed = coordinate
+        }
+
+        func setRegion(on map: MKMapView, coordinate: CLLocationCoordinate2D) {
+            let span = MKCoordinateSpan(latitudeDelta: 0.014, longitudeDelta: 0.014)
+            map.setRegion(MKCoordinateRegion(center: coordinate, span: span), animated: false)
+        }
+    }
+
+    func makeUIView(context: Context) -> MKMapView {
+        let map = MKMapView()
+        map.delegate = context.coordinator
+        // Dark appearance via trait override; standard dark configuration.
+        map.overrideUserInterfaceStyle = .dark
+        map.showsUserLocation = false
+        map.showsCompass = false
+        if let config = map.preferredConfiguration as? MKStandardMapConfiguration {
+            config.pointOfInterestFilter = .includingAll
+            map.preferredConfiguration = config
+        }
+        context.coordinator.install(on: map, coordinate: coordinate, bearing: bearing)
+        context.coordinator.lastFitToken = fitToken
+        return map
+    }
+
+    func updateUIView(_ map: MKMapView, context: Context) {
+        let c = context.coordinator
+        map.delegate = c
+        if c.installed == nil
+            || abs(c.installed!.latitude - coordinate.latitude) > 0.005
+            || abs(c.installed!.longitude - coordinate.longitude) > 0.005 {
+            c.install(on: map, coordinate: coordinate, bearing: bearing)
+        }
+        if c.lastFitToken != fitToken {
+            c.lastFitToken = fitToken
+            c.setRegion(on: map, coordinate: coordinate)
+        }
+    }
+}
+
+/// Geographic destination point along a bearing (great-circle formula, meters).
+private func destinationCoordinate(from: CLLocationCoordinate2D,
+                                   bearingDeg: Double,
+                                   distanceMeters: Double) -> CLLocationCoordinate2D {
+    let R = 6_371_000.0
+    let b = bearingDeg * .pi / 180
+    let φ1 = from.latitude * .pi / 180
+    let λ1 = from.longitude * .pi / 180
+    let δ = distanceMeters / R
+    let φ2 = asin(sin(φ1) * cos(δ) + cos(φ1) * sin(δ) * cos(b))
+    let λ2 = λ1 + atan2(sin(b) * sin(δ) * cos(φ1), cos(δ) - sin(φ1) * sin(φ2))
+    return CLLocationCoordinate2D(latitude: φ2 * 180 / .pi, longitude: λ2 * 180 / .pi)
 }
 
 extension Double {
