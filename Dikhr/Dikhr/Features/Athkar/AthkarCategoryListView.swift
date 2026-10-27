@@ -125,9 +125,9 @@ struct AthkarCategoryListView: View {
                 case "salahPage": AthkarSalahPageView()
                 case "favorites": AthkarFavoritesView()
                 case "followupPage": AthkarFollowupView()
-                case "search": AthkarSearchView()
+                case "search": AthkarSearchPageView()
                 case "more": AthkarSectionsListView()
-                default: AthkarSearchView()
+                default: AthkarSearchPageView()
                 }
             }
             .onAppear {
@@ -852,69 +852,376 @@ struct AthkarFavoritesView: View {
     }
 }
 
-/// البحث — search athkar sections and entry text.
-struct AthkarSearchView: View {
+/// البحث — the original's full-screen dark search page (black bg, centered
+/// white title, back chevron top-right, pill search bar, and grouped results):
+///
+/// Live captures (/tmp/athkar_search.png empty, /tmp/athkar_search_results.png
+/// with "استغفر الله"):
+///   - pill bar: dark rounded field, magnifier at the right end, gray
+///     placeholder "ابحث ..." right-aligned; the LEFT end holds a small
+///     circular button — empty query: gold sparkles inside a pink/purple
+///     gradient ring (their "AI search"); text present: solid gray ✕ (clear).
+///   - results grouped under gold right-aligned headers ("المصحف" for Quran
+///     matches, page title for athkar matches); each row: gold bold title
+///     + gray "آية 106" meta, snippet below in Uthmanic (Quran) or
+///     Scheherazade (athkar), a left "<" chevron; tap opens the target.
+///
+/// The original's AI search service is not replicable; the honest local
+/// mapping is that smart matching is ALWAYS on: the query is stripped of
+/// diacritics/tatweel before it runs (plus an alef/hamza/ya-unified retry,
+/// which also matches how Quran.sqlite's `search_text` normalized ٱ), and
+/// athkar matching normalizes both sides. The sparkle button re-runs that
+/// search; the ✕ clears the field.
+struct AthkarSearchPageView: View {
     @EnvironmentObject private var settings: SettingsStore
+    @Environment(\.dismiss) private var dismiss
     @State private var query = ""
     @State private var categories: [AthkarCategory] = []
+    @State private var quranResults: [QuranAyah] = []
+    @State private var athkarGroups: [AthkarGroup] = []
+    @FocusState private var fieldFocused: Bool
 
     var body: some View {
-        List {
-            if query.trimmingCharacters(in: .whitespaces).isEmpty {
-                Section(settings.t("الأقسام", "Sections")) {
-                    ForEach(categories) { category in
-                        NavigationLink(value: category) {
-                            Text(category.localizedTitle(settings.lang))
-                        }
-                    }
-                }
-            } else {
-                ForEach(matching, id: \.category.id) { group in
-                    Section(group.category.localizedTitle(settings.lang)) {
-                        ForEach(group.entries, id: \.id) { entry in
-                            NavigationLink {
-                                AthkarPageView(category: group.category)
-                            } label: {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(entry.Title ?? "")
-                                        .font(.headline)
-                                        .lineLimit(1)
-                                    Text(AthkarStore.stripHTML(entry.Athkar ?? ""))
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(2)
-                                }
-                            }
-                        }
-                    }
-                }
+        ZStack {
+            Color.black.ignoresSafeArea()
+            VStack(spacing: 0) {
+                topBar
+                searchBar
+                    .padding(.horizontal, 22)
+                    .padding(.top, 10)
+                results
             }
         }
-        .navigationTitle(settings.t("البحث", "Search"))
-        .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $query, placement: .navigationBarDrawer(displayMode: .always),
-                    prompt: Text(settings.t("ابحث في الأذكار", "Search athkar")))
+        .environment(\.layoutDirection, .rightToLeft)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
-            if categories.isEmpty { categories = AthkarStore.loadCategories() }
+            if categories.isEmpty {
+                categories = AthkarStore.loadCategories()
+            }
+            runSearch()
+            fieldFocused = true
+        }
+        .onChange(of: query) { _, _ in runSearch() }
+    }
+
+    // MARK: chrome
+
+    private var topBar: some View {
+        ZStack {
+            Text(settings.t("البحث", "Search"))
+                .font(.system(size: 22, weight: .bold))
+                .foregroundStyle(.white)
+            HStack {
+                Spacer()
+                // Same dark round chevron as AthkarSalahPageView's back button.
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.forward")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 40, height: 40)
+                        .background(Circle().fill(Color.white.opacity(0.10)))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.trailing, 18)
+        }
+        .padding(.top, 34)
+    }
+
+    private var searchBar: some View {
+        HStack(spacing: 10) {
+            // RTL: the magnifier leads at the right end (like the capture).
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.75))
+            TextField(settings.t("ابحث ...", "Search ..."), text: $query)
+                .focused($fieldFocused)
+                .submitLabel(.search)
+                .font(.system(size: 17))
+            smartButton
+        }
+        .padding(.horizontal, 14)
+        .frame(height: 46)
+        .background(RoundedRectangle(cornerRadius: 23)
+            .fill(Color(white: 0.075))
+            .overlay(RoundedRectangle(cornerRadius: 23)
+                .stroke(Color.white.opacity(0.16))))
+    }
+
+    /// Left end of the bar: sparkles in a gradient ring until the field has
+    /// text — tap re-runs the (always-normalized) smart search — then the
+    /// gray ✕ clear button.
+    @ViewBuilder
+    private var smartButton: some View {
+        if query.trimmingCharacters(in: .whitespaces).isEmpty {
+            Button(action: { runSearch() }) {
+                ZStack {
+                    Circle().stroke(LinearGradient(colors: [Color(red: 0.93, green: 0.42, blue: 0.72),
+                                                            Color(red: 0.55, green: 0.48, blue: 0.95)],
+                                                   startPoint: .topLeading, endPoint: .bottomTrailing),
+                                    lineWidth: 1.6)
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(athkarHomeGold)
+                }
+                .frame(width: 27, height: 27)
+            }
+            .buttonStyle(.plain)
+        } else {
+            Button(action: { query = "" }) {
+                ZStack {
+                    Circle().fill(Color(white: 0.35))
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.85))
+                }
+                .frame(width: 27, height: 27)
+            }
+            .buttonStyle(.plain)
         }
     }
 
-    private struct Group {
+    // MARK: results
+
+    @ViewBuilder
+    private var results: some View {
+        if query.trimmingCharacters(in: .whitespaces).isEmpty {
+            // The empty state is a blank black area (capture 1).
+            Spacer().frame(maxHeight: .infinity)
+        } else {
+            ScrollView {
+                VStack(spacing: 0) {
+                    if !quranResults.isEmpty {
+                        QuranResultGroup(title: settings.t("المصحف", "Mushaf"), ayahs: quranResults)
+                    }
+                    ForEach(athkarGroups) { group in
+                        AthkarResultGroup(category: group.category, entries: group.entries)
+                    }
+                }
+                .padding(.top, 10)
+                .padding(.bottom, 40)
+            }
+        }
+    }
+
+    // MARK: search pipeline (always-on Arabic normalization)
+
+    private struct AthkarGroup: Identifiable {
         let category: AthkarCategory
         let entries: [AthkarEntry]
+        var id: String { category.id }
     }
 
-    private var matching: [Group] {
+    private func runSearch() {
         let needle = query.trimmingCharacters(in: .whitespaces)
-        guard !needle.isEmpty else { return [] }
-        return categories.map { category in
-            Group(category: category,
-                  entries: category.entries.filter {
-                      AthkarStore.stripHTML($0.Athkar ?? "").contains(needle)
-                      || ($0.Title ?? "").contains(needle)
-                  })
+        guard !needle.isEmpty else {
+            quranResults = []
+            athkarGroups = []
+            return
         }
-        .filter { !$0.entries.isEmpty }
+        // Quran: QuranDatabase runs LIKE against the pre-normalized
+        // `search_text` column (diacritics stripped, ٱ → ا), so pass the
+        // stripped query; if nothing matched, retry once with the fully
+        // unified form (alef/hamza/ya) the user might have typed.
+        let stripped = searchStripDiacritics(needle)
+        quranResults = QuranDatabase.shared.search(stripped, limit: 30)
+        if quranResults.isEmpty && needle.count > 2 {
+            quranResults = QuranDatabase.shared.search(searchNormalize(stripped), limit: 30)
+        }
+        // Athkar: full normalization on BOTH sides (entry text + title vs query).
+        let normalized = searchNormalize(needle)
+        athkarGroups = categories.compactMap { category in
+            let matches = category.entries.filter { entry in
+                searchNormalize(AthkarStore.stripHTML(entry.Athkar ?? "")).contains(normalized)
+                || searchNormalize(entry.Title ?? "").contains(normalized)
+            }
+            return matches.isEmpty ? nil : AthkarGroup(category: category, entries: matches)
+        }
+    }
+}
+
+// MARK: - Arabic normalization helpers (search page, local to this file)
+
+/// Strip Arabic diacritics + tatweel, keep hamza letters as typed: matches
+/// exactly the normalization Quran.sqlite's `search_text` column uses
+/// ("وَٱسۡتَغۡفِرِ" → "واستغفر", "إِنَّ" → "إن" with the alef hamza kept).
+private func searchStripDiacritics(_ text: String) -> String {
+    text.unicodeScalars.reduce(into: String()) { out, scal in
+        if !searchIsMark(scal) { out.unicodeScalars.append(scal) }
+    }
+}
+
+/// Aggressive smart-match form: also unify ٱأإآ → ا and ى/ئ → ي, so a freely
+/// typed query finds entries regardless of hamza/maqsura spelling.
+private func searchNormalize(_ text: String) -> String {
+    text.unicodeScalars.reduce(into: String()) { out, scal in
+        let mapped: UnicodeScalar
+        switch scal.value {
+        // ٱأإآٲٳ → ا
+        case 0x0671, 0x0623, 0x0625, 0x0622, 0x0672, 0x0673: mapped = "ا"
+        // ىئ → ي
+        case 0x0649, 0x0626: mapped = "ي"
+        // ؤ → و
+        case 0x0624: mapped = "و"
+        default: mapped = scal
+        }
+        if !searchIsMark(mapped) { out.unicodeScalars.append(mapped) }
+    }
+}
+
+/// Diacritic/mark/tatweel range check on a (possibly mapped) scalar.
+private func searchIsMark(_ scal: UnicodeScalar) -> Bool {
+    (0x064B...0x065F).contains(scal.value)
+        || scal.value == 0x0670
+        || (0x06D6...0x06ED).contains(scal.value)
+        || scal.value == 0x0640
+}
+
+// MARK: - Result groups + rows (capture 2 layout)
+
+private struct QuranResultGroup: View {
+    @EnvironmentObject private var settings: SettingsStore
+    let title: String
+    let ayahs: [QuranAyah]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Text(title)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(athkarHomeGold)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 22)
+                .padding(.bottom, 14)
+            ForEach(ayahs) { ayah in
+                QuranResultRow(ayah: ayah)
+                    .padding(.horizontal, 22)
+                    .padding(.bottom, 18)
+            }
+        }
+    }
+}
+
+/// One Quran match: gold surah title + gray "آية 106" meta, full ayah below in
+/// Uthmanic, left chevron. Tap pushes the printed mushaf on that ayah's page.
+private struct QuranResultRow: View {
+    @EnvironmentObject private var settings: SettingsStore
+    let ayah: QuranAyah
+
+    var body: some View {
+        NavigationLink {
+            AthkarSearchMushafPage(page: ayah.page)
+        } label: {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 7) {
+                    HStack(spacing: 8) {
+                        // RTL: the gold title sits at the right, gray meta after.
+                        let surah = QuranDatabase.shared.surah(ayah.surahID)
+                        if let surah {
+                            Text(surah.name)
+                                .font(.system(size: 19, weight: .bold))
+                                .foregroundStyle(athkarHomeGold)
+                            Text(settings.t("آية \(ayah.number)", "Ayah \(ayah.number)"))
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.white.opacity(0.6))
+                        }
+                    }
+                    Text(ayah.text)
+                        .font(.custom("KFGQPCHAFSUthmanicScript-Bold", size: 19))
+                        .foregroundStyle(.white.opacity(0.92))
+                        .lineSpacing(6)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .multilineTextAlignment(.leading)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "chevron.forward")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.8))
+                    .padding(.top, 6)
+            }
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct AthkarResultGroup: View {
+    @EnvironmentObject private var settings: SettingsStore
+    let category: AthkarCategory
+    let entries: [AthkarEntry]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Text(category.localizedTitle(settings.lang))
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(athkarHomeGold)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 22)
+                .padding(.bottom, 14)
+            ForEach(entries, id: \.id) { entry in
+                NavigationLink {
+                    AthkarPageView(category: category)
+                } label: {
+                    AthkarResultRow(category: category, entry: entry)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, 22)
+                .padding(.bottom, 18)
+            }
+        }
+    }
+}
+
+/// One athkar match: gold title (entry's own title or the first words of the
+/// text), the full entry below in Scheherazade, left chevron.
+private struct AthkarResultRow: View {
+    let category: AthkarCategory
+    let entry: AthkarEntry
+
+    private var title: String {
+        entry.Title ?? String(AthkarStore.stripHTML(entry.Athkar ?? "").prefix(32))
+    }
+
+    private var snippet: String {
+        AthkarStore.stripHTML(entry.Athkar ?? "")
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 7) {
+                Text(title)
+                    .font(.system(size: 19, weight: .bold))
+                    .foregroundStyle(athkarHomeGold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Text(snippet)
+                    .font(.athkarBody)
+                    .foregroundStyle(.white.opacity(0.92))
+                    .lineSpacing(4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.leading)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Image(systemName: "chevron.forward")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.8))
+                .padding(.top, 6)
+        }
+    }
+}
+
+/// Deep link into the 604-page mushaf at one matched ayah's printed page:
+/// the page number is persisted to the same `quranLastPage` key the mushaf
+/// restores from, so the pushed QuranPagesView opens exactly there.
+private struct AthkarSearchMushafPage: View {
+    let page: Int
+
+    init(page: Int) {
+        self.page = page
+        QuranPagesTracker.save(page)
+    }
+
+    var body: some View {
+        QuranPagesView()
     }
 }
 
