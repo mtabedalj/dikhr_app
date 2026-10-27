@@ -10,6 +10,9 @@ struct MushafHTMLView: UIViewRepresentable {
     /// "surah:ayah" bookmark keys — these verses get the original's
     /// `.highlight{background-color:yellow}` treatment (default: none).
     var bookmarkedAyahs: Set<String> = []
+    /// One-shot search jump target shown in THIS surah (or nil): that ayah's
+    /// text and circled marker render inside one olive-gold `.jump` block.
+    var jumpAyah: QuranJumpTarget.Point? = nil
 
     static func arabicDigits(_ n: Int) -> String {
         let arabic = ["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"]
@@ -30,7 +33,8 @@ struct MushafHTMLView: UIViewRepresentable {
         webview.scrollView.backgroundColor = .clear
         webview.scrollView.contentInsetAdjustmentBehavior = .never
         let html = MushafHTMLView.html(surah: surah, ayahs: ayahs,
-                                       bookmarkedAyahs: bookmarkedAyahs)
+                                       bookmarkedAyahs: bookmarkedAyahs,
+                                       jumpAyah: jumpAyah)
         context.coordinator.currentHTML = html
         webview.loadHTMLString(html, baseURL: Bundle.main.resourceURL)
         return webview
@@ -38,7 +42,8 @@ struct MushafHTMLView: UIViewRepresentable {
 
     func updateUIView(_ webview: WKWebView, context: Context) {
         let html = MushafHTMLView.html(surah: surah, ayahs: ayahs,
-                                       bookmarkedAyahs: bookmarkedAyahs)
+                                       bookmarkedAyahs: bookmarkedAyahs,
+                                       jumpAyah: jumpAyah)
         if context.coordinator.currentHTML != html {
             context.coordinator.currentHTML = html
             webview.loadHTMLString(html, baseURL: Bundle.main.resourceURL)
@@ -46,9 +51,14 @@ struct MushafHTMLView: UIViewRepresentable {
     }
 
     static func html(surah: QuranSurah, ayahs: [QuranAyah],
-                     bookmarkedAyahs: Set<String> = []) -> String {
+                     bookmarkedAyahs: Set<String> = [],
+                     jumpAyah: QuranJumpTarget.Point? = nil) -> String {
         let flow = ayahs.map { ayah -> String in
             let marker = "<span class='m'>" + arabicDigits(ayah.number) + "</span>"
+            // One-shot search jump: text + marker inside one olive-gold block.
+            if let jump = jumpAyah, jump.surah == surah.id, jump.ayah == ayah.number {
+                return "<span class='jump'>" + ayah.text + " " + marker + "</span> "
+            }
             // Bookmarked verse: `<mark>`-styled span == the original's
             // `.highlight{background-color:yellow}` CSS.
             if bookmarkedAyahs.contains("\(surah.id):\(ayah.number)") {
@@ -89,6 +99,7 @@ struct MushafHTMLView: UIViewRepresentable {
           text-align:justify; text-align-last:center; direction:rtl; }
         .mushaf .m{ color:var(--green); }
         .mushaf .bkm{ background-color:yellow; }
+        .mushaf .jump{ background-color:rgba(107,97,41,.92); border-radius:7px; padding:2px 10px; }
         </style></head><body>
         <div class="page">
           \(bismillah)

@@ -11,6 +11,10 @@ struct QuranPagesView: View {
     @State private var surahs: [QuranSurah] = []
     @State private var showPageList = false
     @State private var showSurahList = false
+    /// The one-shot search jump target for this appearance; cleared once the
+    /// user turns the page so a later swipe back renders without the highlight.
+    @State private var jumpTarget: QuranJumpTarget.Point?
+    @State private var appearedPage: Int = 0
 
     init() {
         // Khatmah: restore the last-read page on open.
@@ -23,7 +27,7 @@ struct QuranPagesView: View {
             Divider().overlay(QuranPalette.darkGreen.opacity(0.18))
             TabView(selection: Binding(get: { page }, set: { page = $0 })) {
                 ForEach(1...604, id: \.self) { number in
-                    QuranPageCell(page: number, selection: page, store: store)
+                    QuranPageCell(page: number, selection: page, store: store, jumpTarget: jumpTarget)
                         .tag(number)
                 }
             }
@@ -60,6 +64,10 @@ struct QuranPagesView: View {
         }
         .onChange(of: page) { _, newPage in
             QuranPagesTracker.save(newPage)
+            // First paint done: turning the page drops the one-shot jump highlight.
+            if jumpTarget != nil && newPage != appearedPage {
+                jumpTarget = nil
+            }
         }
         .onAppear {
             if surahs.isEmpty { surahs = QuranDatabase.shared.surahs() }
@@ -69,6 +77,11 @@ struct QuranPagesView: View {
                let n = Int(jump), (1...604).contains(n) {
                 page = n
             }
+            // Consume the athkar-search jump exactly once per appearance.
+            if jumpTarget == nil {
+                jumpTarget = QuranJumpTarget.take()
+            }
+            appearedPage = page
         }
     }
 
@@ -117,6 +130,9 @@ struct QuranPageCell: View {
     let page: Int
     let selection: Int
     let store: QuranPageStore
+    /// One-shot search jump (surah+ayah) for this appearance, or nil. Only the
+    /// page actually holding that ayah renders the olive-gold highlight.
+    var jumpTarget: QuranJumpTarget.Point?
 
     /// "surah:ayah" bookmark keys on this page — drives the yellow highlight.
     private func bookmarkedKeys(_ ayahs: [QuranAyah]) -> Set<String> {
@@ -127,12 +143,19 @@ struct QuranPageCell: View {
     var body: some View {
         if abs(page - selection) <= 1 {
             let data = store.page(page)
+            let jump: QuranJumpTarget.Point? = {
+                guard let target = jumpTarget,
+                      data.ayahs.contains(where: { $0.surahID == target.surah && $0.number == target.ayah })
+                else { return nil }
+                return target
+            }()
             QuranPageWebView(page: page,
                              ayahs: data.ayahs,
                              juzLabel: settings.t("الجزء \(QuranPageHTML.arabicDigits(data.juzID))",
                                                   "Juz \(data.juzID)"),
                              bandSurahName: data.surahNames,
-                             bookmarkedAyahs: bookmarkedKeys(data.ayahs))
+                             bookmarkedAyahs: bookmarkedKeys(data.ayahs),
+                             jumpAyah: jump)
         } else {
             ZStack {
                 QuranPalette.paper.ignoresSafeArea()
@@ -145,6 +168,31 @@ struct QuranPageCell: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - One-shot target-ayah jump (athkar search → mushaf highlight)
+
+/// One-shot jump target: the athkar search sets (surah, ayah) right before
+/// pushing the mushaf; QuranPagesView takes it on appear and the matched ayah's
+/// span renders with the olive-gold `.jump` highlight (see QuranPageHTML).
+/// Cleared after the first paint (taken on appear) so nothing lingers.
+enum QuranJumpTarget {
+    struct Point: Equatable {
+        let surah: Int
+        let ayah: Int
+    }
+
+    private static var pending: Point?
+
+    static func set(surah: Int, ayah: Int) {
+        pending = Point(surah: surah, ayah: ayah)
+    }
+
+    /// Read-and-clear: only the push that follows the search highlight consumes it.
+    static func take() -> Point? {
+        defer { pending = nil }
+        return pending
     }
 }
 

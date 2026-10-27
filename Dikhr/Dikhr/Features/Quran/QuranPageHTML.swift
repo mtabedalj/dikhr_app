@@ -12,10 +12,14 @@ enum QuranPageHTML {
     }
 
     /// `juzLabel` / `bandSurahName` come from the pages table via QuranPageStore.
+    /// `jumpAyah` is the one-shot search target on this page: that ayah's text
+    /// and circled marker render inside one olive-gold rounded highlight block
+    /// (the original's search-result jump, capture: An-Nisa 106 on page 97).
     static func pageHTML(page: Int, ayahs: [QuranAyah],
                          juzLabel: String? = nil,
                          bandSurahName: String? = nil,
-                         bookmarkedAyahs: Set<String> = []) -> String {
+                         bookmarkedAyahs: Set<String> = [],
+                         jumpAyah: QuranJumpTarget.Point? = nil) -> String {
         var flow = ""
         var previousSurahID: Int?
         for (index, run) in runs(ayahs).enumerated() {
@@ -34,6 +38,11 @@ enum QuranPageHTML {
             }
             flow += run.ayahs.map { ayah -> String in
                 let marker = "<span class='m'>" + arabicDigits(ayah.number) + "</span>"
+                // One-shot search jump: text + marker inside ONE olive-gold
+                // rounded block (`.jump`), like the original capture.
+                if let jump = jumpAyah, jump.surah == run.surahID, jump.ayah == ayah.number {
+                    return "<span class='jump'>" + ayah.text + " " + marker + "</span> "
+                }
                 // Bookmarked verse: `<mark>`-styled yellow highlight
                 // (the original's `.highlight{background-color:yellow}`).
                 if bookmarkedAyahs.contains("\(run.surahID):\(ayah.number)") {
@@ -75,6 +84,7 @@ enum QuranPageHTML {
           text-align:justify; text-align-last:center; direction:rtl; }
         .mushaf .m{ color:var(--green); }
         .mushaf .bkm{ background-color:yellow; }
+        .mushaf .jump{ background-color:rgba(107,97,41,.92); border-radius:7px; padding:2px 10px; }
         .shead{ text-align:center; margin:10px 0 8px; }
         .shead .rosette{ color:var(--green); font-size:20px; line-height:1.2; }
         .shead .sname{ color:var(--green); font-weight:700; font-size:23px;
@@ -128,6 +138,9 @@ struct QuranPageWebView: UIViewRepresentable {
     let bandSurahName: String
     /// "surah:ayah" bookmark keys for the yellow `<mark>`-style highlight.
     var bookmarkedAyahs: Set<String> = []
+    /// One-shot search jump target contained on THIS page (or nil): renders the
+    /// olive-gold `.jump` block behind that ayah's text and circled marker.
+    var jumpAyah: QuranJumpTarget.Point? = nil
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
@@ -145,7 +158,8 @@ struct QuranPageWebView: UIViewRepresentable {
         let html = QuranPageHTML.pageHTML(page: page, ayahs: ayahs,
                                           juzLabel: juzLabel,
                                           bandSurahName: bandSurahName,
-                                          bookmarkedAyahs: bookmarkedAyahs)
+                                          bookmarkedAyahs: bookmarkedAyahs,
+                                          jumpAyah: jumpAyah)
         context.coordinator.currentHTML = html
         webview.loadHTMLString(html, baseURL: Bundle.main.resourceURL)
         return webview
@@ -155,7 +169,8 @@ struct QuranPageWebView: UIViewRepresentable {
         let html = QuranPageHTML.pageHTML(page: page, ayahs: ayahs,
                                           juzLabel: juzLabel,
                                           bandSurahName: bandSurahName,
-                                          bookmarkedAyahs: bookmarkedAyahs)
+                                          bookmarkedAyahs: bookmarkedAyahs,
+                                          jumpAyah: jumpAyah)
         if context.coordinator.currentHTML != html {
             context.coordinator.currentHTML = html
             webview.loadHTMLString(html, baseURL: Bundle.main.resourceURL)

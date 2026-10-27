@@ -1109,7 +1109,7 @@ private struct QuranResultRow: View {
 
     var body: some View {
         NavigationLink {
-            AthkarSearchMushafPage(page: ayah.page)
+            AthkarSearchMushafPage(page: ayah.page, ayah: ayah)
         } label: {
             HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 7) {
@@ -1211,13 +1211,16 @@ private struct AthkarResultRow: View {
 
 /// Deep link into the 604-page mushaf at one matched ayah's printed page:
 /// the page number is persisted to the same `quranLastPage` key the mushaf
-/// restores from, so the pushed QuranPagesView opens exactly there.
+/// restores from, so the pushed QuranPagesView opens exactly there, and the
+/// matched ayah itself gets the one-shot olive-gold `.jump` highlight
+/// (QuranJumpTarget is set here, taken/cleared by the pages view on appear).
 private struct AthkarSearchMushafPage: View {
     let page: Int
 
-    init(page: Int) {
+    init(page: Int, ayah: QuranAyah) {
         self.page = page
         QuranPagesTracker.save(page)
+        QuranJumpTarget.set(surah: ayah.surahID, ayah: ayah.number)
     }
 
     var body: some View {
