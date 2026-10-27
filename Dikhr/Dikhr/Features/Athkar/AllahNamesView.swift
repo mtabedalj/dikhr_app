@@ -36,6 +36,22 @@ import SwiftUI
 // AthkarStore.loadNinetyNineNames() (original content.json order), which
 // is the dataset the capture tiles display (name 1 = "اللَّهُ",
 // 6 = "السَّلامُ" — matches the capture exactly).
+//
+// Tile tap → NameDetailView (live capture /tmp/w18a.png of the REAL app's
+// name-detail page for "الشَّهيدُ"): black page, SAME chrome as the grid
+// (centered bold title + round right-chevron back), a BLUE name title at the
+// top (the note-spans accent), an ornate circled index (the detail-page
+// ornament style) beside the name, the (name, details) pair's details string
+// rendered via AthkarTextRenderer (note/attribution segments come out blue —
+// the capture's blue quran-quote spans live in that data), and a bottom
+// navigation row (RTL, left→right as captured): next-name link, the current
+// name's index in gray, previous-name link, share circle button.
+// Prev/next navigate by the SAME 1..99 index the tiles display.
+
+private struct SelectedName: Identifiable {
+    let index: Int
+    var id: Int { index }
+}
 
 private let allahNamesTileFill = Color(red: 0.058, green: 0.058, blue: 0.062)
 private let allahNamesChipFill = Color.white.opacity(0.10)
@@ -62,6 +78,7 @@ struct AllahNamesView: View {
     @State private var inQuran: Set<String> = []
     @State private var chip: AllahNamesChip = .names
     @State private var query = ""
+    @State private var selected: SelectedName?
 
     // RTL is part of the capture's ground truth (tile 1 top-right), so the
     // page pins it instead of following the app language.
@@ -97,6 +114,9 @@ struct AllahNamesView: View {
         .environment(\.layoutDirection, .rightToLeft)
         .toolbar(.hidden, for: .navigationBar)
         .onAppear(perform: load)
+        .fullScreenCover(item: $selected) { sel in
+            NameDetailView(initialIndex: sel.index)
+        }
     }
 
     private func load() {
@@ -188,7 +208,12 @@ struct AllahNamesView: View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 14) {
                 ForEach(filtered, id: \.offset) { entry in
-                    tile(entry.element.name, number: entry.offset + 1)
+                    Button {
+                        selected = SelectedName(index: entry.offset)
+                    } label: {
+                        tile(entry.element.name, number: entry.offset + 1)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.top, 4)
@@ -230,29 +255,184 @@ struct AllahNamesView: View {
         ScrollView {
             LazyVStack(spacing: 0) {
                 ForEach(filtered, id: \.offset) { entry in
-                    HStack {
-                        Text("\(entry.offset + 1)")
-                            .font(.system(size: 13, weight: .semibold).monospacedDigit())
-                            .foregroundStyle(Color.white.opacity(0.3))
-                            .frame(width: 28)
-                        Text(entry.element.name)
-                            .font(Font.custom("Scheherazade-Regular", size: 20).weight(.semibold))
-                            .foregroundStyle(.white)
-                        Spacer()
-                        Text(entry.element.details)
-                            .font(.system(size: 13))
-                            .foregroundStyle(.white.opacity(0.45))
+                    Button {
+                        selected = SelectedName(index: entry.offset)
+                    } label: {
+                        HStack {
+                            Text("\(entry.offset + 1)")
+                                .font(.system(size: 13, weight: .semibold).monospacedDigit())
+                                .foregroundStyle(Color.white.opacity(0.3))
+                                .frame(width: 28)
+                            Text(entry.element.name)
+                                .font(Font.custom("Scheherazade-Regular", size: 20).weight(.semibold))
+                                .foregroundStyle(.white)
+                            Spacer()
+                            Text(entry.element.details)
+                                .font(.system(size: 13))
+                                .foregroundStyle(.white.opacity(0.45))
+                        }
+                        .padding(.vertical, 10)
+                        .background(Rectangle().fill(allahNamesTileFill))
+                        .overlay(alignment: .bottom) {
+                            Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1)
+                        }
                     }
-                    .padding(.vertical, 10)
-                    .background(Rectangle().fill(allahNamesTileFill))
-                    .overlay(alignment: .bottom) {
-                        Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1)
-                    }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.top, 4)
             .padding(.bottom, 24)
         }
+    }
+}
+
+// MARK: - name detail page (capture /tmp/w18a.png)
+
+struct NameDetailView: View {
+    let initialIndex: Int
+
+    @EnvironmentObject private var settings: SettingsStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var names: [(name: String, details: String)] = []
+    @State private var index = 0
+
+    private let gold = Color(red: 0.79, green: 0.65, blue: 0.35)
+    // The blue of the capture's name title / inline note spans (the detail
+    // page's note accent, same #0aa3c8 AthkarTextRenderer styles with).
+    private let titleBlue = Color(red: 10 / 255, green: 163 / 255, blue: 200 / 255)
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+            VStack(spacing: 0) {
+                chrome
+                content
+                bottomBar
+            }
+        }
+        .environment(\.layoutDirection, .rightToLeft)
+        .toolbar(.hidden, for: .navigationBar)
+        .onAppear {
+            if index < 1 || names.isEmpty {
+                if names.isEmpty { names = AthkarStore.loadNinetyNineNames() }
+                index = max(0, min(initialIndex, max(0, names.count - 1)))
+            }
+        }
+    }
+
+    private var entry: (name: String, details: String)? {
+        names.indices.contains(index) ? names[index] : nil
+    }
+
+    // MARK: chrome — centered title + round right-chevron back (same as grid)
+
+    private var chrome: some View {
+        ZStack(alignment: .top) {
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.forward")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 40, height: 40)
+                        .background(Circle().fill(Color.white.opacity(0.10)))
+                }
+                .buttonStyle(.plain)
+                Spacer()
+            }
+            .padding(.top, 52)
+            Text(settings.t("أسماء الله الحسنى", "Names of Allah"))
+                .font(.system(size: 24, weight: .bold))
+                .foregroundStyle(.white)
+                .padding(.top, 52)
+        }
+        .padding(.bottom, 16)
+    }
+
+    // MARK: content — blue name title + ornate circled index, then the
+    // details string through AthkarTextRenderer (note/attribution spans
+    // render in the blue accent, like the capture's inline quote spans).
+
+    private var content: some View {
+        ScrollView {
+            VStack(spacing: 18) {
+                if let entry {
+                    HStack(spacing: 12) {
+                        // RTL: the blue name first (right), the ornate
+                        // circled index beside it.
+                        Text(entry.name)
+                            .font(Font.custom("Scheherazade-Regular", size: 30).weight(.semibold))
+                            .foregroundStyle(titleBlue)
+                            .multilineTextAlignment(.leading)
+                        AthkarCircledNumber(value: index + 1, diameter: 38, color: gold)
+                        Spacer()
+                    }
+                    .padding(.top, 8)
+                    ForEach(AthkarTextRenderer.segments(entry.details)) { seg in
+                        let blue = seg.style == .note || seg.style == .attribution || seg.style == .heading
+                        Text(seg.text)
+                            .font(Font.custom("Scheherazade-Regular", size: 24))
+                            .foregroundStyle(blue ? titleBlue : Color.white.opacity(0.95))
+                            .lineSpacing(10)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .multilineTextAlignment(.leading)
+                    }
+                }
+            }
+            .padding(.horizontal, 22)
+            .padding(.bottom, 24)
+            .frame(maxWidth: .infinity)
+        }
+        .scrollBounceBehavior(.basedOnSize)
+    }
+
+    // MARK: bottom navigation — RTL row (visual left→right in the capture):
+    // next-name link, the current name's index in gray, previous-name link,
+    // and the share circle button at the right end.
+
+    private var bottomBar: some View {
+        HStack(spacing: 20) {
+            ShareLink(item: shareText) {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 40, height: 40)
+                    .background(Circle().fill(Color.white.opacity(0.09)))
+            }
+            if let prev = names.indices.contains(index - 1) ? names[index - 1].name : nil {
+                Button { index -= 1 } label: {
+                    Text(prev)
+                        .font(Font.custom("Scheherazade-Regular", size: 19))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                }
+                .buttonStyle(.plain)
+            }
+            Text("\(index + 1)")
+                .font(.system(size: 16, weight: .semibold).monospacedDigit())
+                .foregroundStyle(.white.opacity(0.45))
+            if let next = names.indices.contains(index + 1) ? names[index + 1].name : nil {
+                Button { index += 1 } label: {
+                    Text(next)
+                        .font(Font.custom("Scheherazade-Regular", size: 19))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 10)
+        .padding(.bottom, 8)
+    }
+
+    private var shareText: String {
+        guard let entry else { return "" }
+        var parts = ["أسماء الله الحسنى", entry.name]
+        if !entry.details.isEmpty { parts.append(entry.details) }
+        parts.append("من تطبيق دِكر")
+        return parts.joined(separator: "\n")
     }
 }
 
