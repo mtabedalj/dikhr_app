@@ -16,6 +16,9 @@ private let athkarCategoryEnglishTitles: [String: String] = [
     "RoqiaQuran": "Ruqyah from the Quran",
     "RoqiaSuna": "Ruqyah of the Sunnah",
     "Tasbee7": "Tasbih",
+    // Pseudo-categories loaded from mix.json (أدعية شاملة).
+    "shamelaAll": "Comprehensive Athkar",
+    "shamelaShort": "Summary",
 ]
 
 extension AthkarCategory {
@@ -68,6 +71,9 @@ struct AthkarCategoryListView: View {
     @State private var ringRatio: Double = 0
     @State private var now = Date()
     @State private var nameCount = 0
+    @State private var shamelahMix: [AthkarEntry] = []
+    @State private var shamelahShort: [AthkarEntry] = []
+    @State private var tickerIndex = 0
 
     private let tickTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -125,6 +131,10 @@ struct AthkarCategoryListView: View {
                 if categories.isEmpty {
                     categories = AthkarStore.loadCategories()
                     nameCount = AthkarStore.loadNinetyNineNames().count
+                    shamelahMix = athkarShamelahEntries("Mix")
+                    shamelahShort = athkarShamelahEntries("ShortMix")
+                    let day = Calendar.current.ordinality(of: .day, in: .year, for: now) ?? 0
+                    tickerIndex = day % athkarHomeTickerTexts.count
                 }
                 refreshRing()
                 if let push = ProcessInfo.processInfo.environment["DIKHR_PUSH"] {
@@ -466,11 +476,48 @@ struct AthkarCategoryListView: View {
         }
     }
 
+    /// Grid continuation (live capture 2): below المزيد — RTL pairs of the
+    /// comprehensive-athkar section, then the hadith ticker, crown divider and
+    /// the Pro rows. Locked rows = features Dikhr does not re-implement.
+    private var gridTailFree: [String] {
+        ["shamelaSections", "shamelaShort", "lockedSick", "lockedTayseer",
+         "lockedMayyit", "ayaTafseer"]
+    }
+
+    /// Pro rows under the crown divider (right column first, RTL), all locked.
+    private var gridTailPro: [String] {
+        ["lockedDate", "lockedAhbab", "lockedKids", "lockedUmra",
+         "lockedHajj", "lockedCard", "lockedBooklet", "lockedWidget"]
+    }
+
+    private var shamelahAllCategory: AthkarCategory? {
+        shamelahMix.isEmpty ? nil : AthkarCategory(id: "shamelaAll",
+                                                   title: "أدعية شاملة",
+                                                   entries: shamelahMix)
+    }
+
     private func gridTitle(_ id: String) -> String {
         switch id {
         case "allahNames": return settings.t("أسماء اللّٰه الحسنى", "Names of Allah")
         case "myAthkar": return settings.t("أذكاري", "My Athkar")
         case "more": return settings.t("المزيد", "More")
+        // Free continuation rows with an existing Dikhr feature
+        case "shamelaSections", "shamelaAll":
+            return settings.t("أقسام الأدعية", "Sections")
+        case "shamelaShort": return settings.t("مختصر الأدعية", "Summary")
+        case "ayaTafseer": return settings.t("أية وتفسير", "Verse and interpretation")
+        // Pro/locked rows — original titles (Original Localizable.strings evidence)
+        case "lockedSick": return settings.t("أدعية المريض", "Duaas for the sick")
+        case "lockedTayseer": return settings.t("أدعية التيسير", "Duaas for ease")
+        case "lockedMayyit": return settings.t("أدعية الميت", "Supplications for the deceased")
+        case "lockedDate": return settings.t("التاريخ", "Dates")
+        case "lockedAhbab": return settings.t("أذكار الأحبة", "Athkar for loved ones")
+        case "lockedKids": return settings.t("أذكار للصغار", "Athkar for kids")
+        case "lockedUmra": return settings.t("العمرة", "Umrah")
+        case "lockedHajj": return settings.t("الحج", "Hajj")
+        case "lockedCard": return settings.t("بطاقة الأذكار", "Athkar Cards")
+        case "lockedBooklet": return settings.t("كتيب الأذكار", "Athkar Booklet")
+        case "lockedWidget": return settings.t("أدعية في الويدجت", "Duaas in the widget")
         default: return categories.first(where: { $0.id == id })?.localizedTitle(settings.lang) ?? id
         }
     }
@@ -478,17 +525,65 @@ struct AthkarCategoryListView: View {
     private func gridCount(_ id: String) -> Int? {
         switch id {
         case "allahNames": return nameCount
+        case "shamelaSections", "shamelaShort": return nil
         case "myAthkar", "more": return nil
-        default: return categories.first(where: { $0.id == id })?.entries.count
+        default:
+            if id.hasPrefix("locked") || id == "ayaTafseer" { return nil }
+            return categories.first(where: { $0.id == id })?.entries.count
         }
     }
 
     private var categoryGrid: some View {
+        VStack(spacing: 14) {
+            // 1. the original first rows (unchanged)
+            gridChipSection(gridOrder)
+            // 2. full-width أدعية شاملة row (capture: one wide pill, two labels)
+            shamelahWideRow
+            // 3. free continuation cells
+            gridChipSection(gridTailFree)
+            // 4. hadith ticker strip
+            athkarHomeTicker
+            // 5. gold crown divider
+            crownDivider
+            // 6. Pro rows (locked)
+            gridChipSection(gridTailPro)
+        }
+        .padding(.horizontal)
+        .padding(.top, 16)
+    }
+
+    private func gridChipSection(_ ids: [String]) -> some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12),
                             GridItem(.flexible())], spacing: 14) {
-            ForEach(gridOrder, id: \.self) { id in
-                if id == "more",
-                   let target = AthkarHomeChipTarget(rawValue: "more") {
+            ForEach(ids, id: \.self) { id in
+                if id.hasPrefix("locked") {
+                    // Pro/absent feature: inert, secondary style + lock.
+                    proChipBody(id: id)
+                } else if id == "ayaTafseer" {
+                    // أية وتفسير → existing Quran feature (Tafseer on long press).
+                    Button(action: { DeepLinkRouter.shared.pendingTab = "quran" }) {
+                        gridChipBody(id: id)
+                    }
+                    .buttonStyle(.plain)
+                } else if id == "shamelaSections", let category = shamelahAllCategory {
+                    NavigationLink(value: category) {
+                        gridChipBody(id: id)
+                    }
+                    .buttonStyle(.plain)
+                } else if id == "shamelaAll", let category = shamelahAllCategory {
+                    NavigationLink(value: category) {
+                        gridChipBody(id: id)
+                    }
+                    .buttonStyle(.plain)
+                } else if id == "shamelaShort", !shamelahShort.isEmpty {
+                    NavigationLink(value: AthkarCategory(id: "shamelaShort",
+                                                         title: "مختصر الأدعية",
+                                                         entries: shamelahShort)) {
+                        gridChipBody(id: id)
+                    }
+                    .buttonStyle(.plain)
+                } else if id == "more",
+                          let target = AthkarHomeChipTarget(rawValue: "more") {
                     Button(action: { path.append(target.route) }) {
                         gridChipBody(id: id)
                     }
@@ -506,8 +601,108 @@ struct AthkarCategoryListView: View {
                 }
             }
         }
-        .padding(.horizontal)
-        .padding(.top, 16)
+    }
+
+    /// Full-width wide row right above the ticker (matching the capture).
+    private var shamelahWideRow: some View {
+        HStack(spacing: 10) {
+            if let category = shamelahAllCategory {
+                NavigationLink(value: category) {
+                    Text(settings.t("أدعية شاملة", "Comprehensive Athkar"))
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(Color.white)
+                        .lineLimit(1)
+                }
+                .buttonStyle(.plain)
+            }
+            Spacer()
+            if !shamelahShort.isEmpty {
+                NavigationLink(value: AthkarCategory(id: "shamelaShort",
+                                                     title: "مختصر الأدعية",
+                                                     entries: shamelahShort)) {
+                    Text(settings.t("أدعية شاملة في صفحة واحدة",
+                                    "Comprehensive supplications on one page"))
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.5))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 17)
+        .background(RoundedRectangle(cornerRadius: 20)
+            .fill(Color(red: 0.055, green: 0.055, blue: 0.062))
+            .overlay(RoundedRectangle(cornerRadius: 20)
+                .stroke(Color.white.opacity(0.16))))
+    }
+
+    /// Rounded dark strip showing ONE hadith snippet; taps cycle through the
+    /// static list. Rotates daily (dayIndex % count), no persistence.
+    private var athkarHomeTicker: some View {
+        Button {
+            tickerIndex = (tickerIndex + 1) % athkarHomeTickerTexts.count
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "chevron.backward")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.4))
+                Spacer()
+                Text(athkarHomeTickerTexts[tickerIndex % athkarHomeTickerTexts.count])
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 18)
+            .background(RoundedRectangle(cornerRadius: 20)
+                .fill(Color(red: 0.125, green: 0.125, blue: 0.14))
+                .overlay(RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.white.opacity(0.10))))
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// Hairline — gold crown — hairline, before the Pro rows.
+    private var crownDivider: some View {
+        HStack(spacing: 10) {
+            Rectangle()
+                .fill(athkarHomeGold.opacity(0.4))
+                .frame(height: 0.7)
+            Image(systemName: "crown.fill")
+                .font(.system(size: 12))
+                .foregroundStyle(athkarHomeGold)
+            Rectangle()
+                .fill(athkarHomeGold.opacity(0.4))
+                .frame(height: 0.7)
+        }
+        .padding(.horizontal, 4)
+        .padding(.top, 10)
+    }
+
+    /// Pro row: secondary text + lock glyph, inert (no invented page).
+    private func proChipBody(id: String) -> some View {
+        HStack(spacing: 6) {
+            Spacer()
+            Image(systemName: "lock.fill")
+                .font(.system(size: 11))
+                .foregroundStyle(.white.opacity(0.4))
+            Text(gridTitle(id))
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.white.opacity(0.55))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 15)
+        .background(RoundedRectangle(cornerRadius: 20)
+            .fill(Color(red: 0.055, green: 0.055, blue: 0.062))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.14))))
     }
 
     @ViewBuilder
@@ -546,6 +741,31 @@ private enum AthkarHomeChipTarget: String {
     case allahNames, myAthkar, more
 
     var route: String { rawValue }
+}
+
+/// Hadith snippets for the home ticker. All six appear verbatim in the
+/// original app's binary (prayer-hadith list + the البقرة ticker literal);
+/// classical sources, public domain.
+private let athkarHomeTickerTexts: [String] = [
+    "من قرأ الآيتين من آخر سورة البقرة في ليلة كفتاه. (رواه البخاري)",
+    "من صلى البردين دخل الجنة. (رواه البخاري)",
+    "لن يلج النار أحد صلى قبل طلوع الشمس وقبل غروبها. (رواه مسلم)",
+    "من صلى الصبح في جماعة فكأنما صلى الليل كله. (رواه مسلم)",
+    "رَكْعتا الفجْرِ (سنة الفجر) خيْرٌ مِنَ الدُّنيا ومَا فِيها. (رواه مسلم)",
+    "من حافظ على الأربع قبل الظهر، وأربع بعدها، حرّمه الله على النار. (رواه أبو داود)",
+]
+
+/// Load one list from the bundled mix.json ("Mix" / "ShortMix") as athkar
+/// entries — the original's الأدعية الشاملة data, already converted.
+private func athkarShamelahEntries(_ key: String) -> [AthkarEntry] {
+    guard let url = Bundle.main.url(forResource: "mix", withExtension: "json"),
+          let data = try? Data(contentsOf: url),
+          let raw = try? JSONSerialization.jsonObject(with: data) as? [String: [String]],
+          let list = raw[key]
+    else { return [] }
+    return list.map { text in
+        AthkarEntry(Title: nil, Athkar: text, Count: nil, Audio: nil)
+    }
 }
 
 /// Favorite identity scheme shared with AthkarPageView.
