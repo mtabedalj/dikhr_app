@@ -123,6 +123,7 @@ struct AthkarCategoryListView: View {
                 case "qibla": QiblaView()
                 case "salahPage": AthkarSalahPageView()
                 case "favorites": AthkarFavoritesView()
+                case "followupPage": AthkarFollowupView()
                 case "search": AthkarSearchView()
                 case "more": AthkarSectionsListView()
                 default: AthkarSearchView()
@@ -316,7 +317,9 @@ struct AthkarCategoryListView: View {
                     case .favorites:
                         path.append("favorites")
                     case .counter:
-                        DeepLinkRouter.shared.pendingTab = "counter"
+                        // العداد opens the متابعة والعداد page (real-app evidence),
+                        // not the counter tab.
+                        path.append("followupPage")
                     case .prayer:
                         // الصلاة chip pushes the full-screen prayer page.
                         path.append("salahPage")
