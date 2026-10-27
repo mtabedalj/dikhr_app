@@ -416,6 +416,7 @@ struct AthkarPageDetailView: View {
     private func listCard(entry: AthkarEntry, index: Int, key: String,
                           count: Int, target: Int, isLastTapped: Bool) -> some View {
         let segments = displaySegments(entry)
+        let complete = count >= target
         return VStack(alignment: .leading, spacing: 16) {
             // Zikr with circled ①②③ markers at the segment boundaries.
             VStack(alignment: .leading, spacing: 12) {
@@ -425,6 +426,7 @@ struct AthkarPageDetailView: View {
                             AthkarCircledNumber(value: seg.id, diameter: 21)
                         }
                         segmentText(seg, big: false)
+                            .opacity(complete ? 0.45 : 1)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .multilineTextAlignment(.leading)
                     }
@@ -469,20 +471,29 @@ struct AthkarPageDetailView: View {
     /// Count badge: plain circle with the tap count (Arabic digits); a gold
     /// partial arc while below the entry's target, a FULL gold ring once
     /// count == target.
+    /// Count badge: circle + count while below the target (gold arc fills
+    /// from 12 o'clock); a plain white checkmark once count reaches the
+    /// target (matches the original's completed state; counting continues).
     private func countBadge(count: Int, target: Int) -> some View {
         let ratio = target > 0 ? Double(min(count, target)) / Double(target) : 0
         return ZStack {
-            Circle().stroke(Color.white.opacity(0.22), lineWidth: 2.5)
-            if ratio > 0 {
-                Circle()
-                    .trim(from: 0, to: ratio)
-                    .stroke(gold, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
+            if count >= target {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(.white)
+            } else {
+                Circle().stroke(Color.white.opacity(0.22), lineWidth: 2.5)
+                if ratio > 0 {
+                    Circle()
+                        .trim(from: 0, to: ratio)
+                        .stroke(gold, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                }
+                Text(athkarArabicDigits(count))
+                    .font(.system(size: 14, weight: .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(.white)
             }
-            Text(athkarArabicDigits(count))
-                .font(.system(size: 14, weight: .semibold))
-                .monospacedDigit()
-                .foregroundStyle(.white)
         }
         .frame(width: 38, height: 38)
     }
