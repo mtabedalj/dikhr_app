@@ -259,10 +259,14 @@ struct AthkarCategoryListView: View {
     private func stripTime(_ name: String, _ time: String) -> some View {
         HStack(spacing: 10) {
             Text(name)
-                .font(.system(size: 19, weight: .bold))
+                .font(.system(size: 18, weight: .bold))
+                .lineLimit(1)
+                .fixedSize()
                 .foregroundStyle(.white)
             Text(time)
-                .font(.system(size: 19, weight: .bold))
+                .font(.system(size: 18, weight: .bold))
+                .lineLimit(1)
+                .fixedSize()
                 .monospacedDigit()
                 .foregroundStyle(.white)
         }
