@@ -103,7 +103,6 @@ struct AllahNamesView: View {
             VStack(spacing: 12) {
                 topBar
                 chipRow
-                searchField
                 switch chip {
                 case .names, .quran: nameGrid
                 case .mushaf: mushafList
@@ -172,34 +171,6 @@ struct AllahNamesView: View {
                 .buttonStyle(.plain)
             }
         }
-    }
-
-    // MARK: search keeps the original's search function on-page (the
-    // original moved its search chrome to its own page; here it filters the
-    // grid in place since this page hides the nav bar that hosts .searchable)
-
-    private var searchField: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 14))
-                .foregroundStyle(.white.opacity(0.45))
-            TextField(settings.t("ابحث في الأسماء", "Search the names"), text: $query)
-                .font(.system(size: 15))
-                .foregroundStyle(.white)
-            if !query.isEmpty {
-                Button {
-                    query = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(.white.opacity(0.45))
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(.horizontal, 14)
-        .frame(height: 40)
-        .background(Capsule().fill(Color.white.opacity(0.08)))
     }
 
     // MARK: 6-column RTL grid — dark rounded tiles, name + gray number
