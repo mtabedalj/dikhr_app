@@ -74,6 +74,7 @@ struct AthkarCategoryListView: View {
     @State private var shamelahMix: [AthkarEntry] = []
     @State private var shamelahShort: [AthkarEntry] = []
     @State private var tickerIndex = 0
+    @State private var showSettingsSheet = false
 
     private let tickTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -160,6 +161,11 @@ struct AthkarCategoryListView: View {
                 for: NSNotification.Name("dikhr-checkin-changed"))) { _ in
                 refreshRing()
             }
+            // The gear button (like the original) opens the SETTINGS BOTTOM SHEET,
+            // not the settings tab. (.presentation modifiers live inside the view.)
+            .sheet(isPresented: $showSettingsSheet) {
+                SettingsSheetView()
+            }
         }
     }
 
@@ -191,7 +197,7 @@ struct AthkarCategoryListView: View {
                 HStack(spacing: 12) {
                     Spacer()
                     homeCircleButton("gearshape.fill", action: {
-                        DeepLinkRouter.shared.pendingTab = "settings"
+                        showSettingsSheet = true
                     })
                     homeCircleButton("magnifyingglass", action: { path.append("search") })
                     homeCircleButton("bookmark", action: { path.append("favorites") })
