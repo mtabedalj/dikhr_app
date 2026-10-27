@@ -652,9 +652,13 @@ struct AthkarCategoryListView: View {
     private var gridOrder: [String] {
         switch chip {
         case .all:
-            return ["allahNames", "Page1", "Page2", "Tasbee7", "Page5", "myAthkar",
-                    "Page31", "Page3", "Page7", "Page8", "RoqiaQuran", "RoqiaSuna",
-                    "AkherAyateen", "Page4", "Page6", "more"]
+            // Exact sequence of the original's home grid (RTL pairs,
+            // live-verified 2026-10-27). أذكار الصلاة has no offline content
+            // in the original's bundle (a v10 remote row) — its label opens
+            // the post-prayer adhkar, the closest shipped content.
+            return ["allahNames", "Page1", "Page2", "Tasbee7", "salahAlias",
+                    "myAthkar", "Page5", "Page3", "Page7", "Page6",
+                    "Page8", "RoqiaSuna", "RoqiaQuran", "AkherAyateen", "more"]
         case .prayer:
             return ["Page5"]
         case .qibla, .favorites, .counter:
@@ -687,6 +691,7 @@ struct AthkarCategoryListView: View {
         case "allahNames": return settings.t("أسماء اللّٰه الحسنى", "Names of Allah")
         case "myAthkar": return settings.t("أذكاري", "My Athkar")
         case "more": return settings.t("المزيد", "More")
+        case "salahAlias": return settings.t("أذكار الصلاة", "Prayer Athkar")
         // Free continuation rows with an existing Dikhr feature
         case "shamelaSections", "shamelaAll":
             return settings.t("أقسام الأدعية", "Sections")
@@ -748,6 +753,16 @@ struct AthkarCategoryListView: View {
                 } else if id == "ayaTafseer" {
                     // أية وتفسير → existing Quran feature (Tafseer on long press).
                     Button(action: { DeepLinkRouter.shared.pendingTab = "quran" }) {
+                        gridChipBody(id: id)
+                    }
+                    .buttonStyle(.plain)
+                } else if id == "salahAlias", let page5 = categories.first(where: { $0.id == "Page5" }) {
+                    // The original's v10 remote row "أذكار الصلاة"; offline
+                    // content isn't in their bundle, so this opens the shipped
+                    // post-prayer adhkar (the overlapping content).
+                    NavigationLink(value: AthkarCategory(id: "salahAlias",
+                                                         title: gridTitle("salahAlias"),
+                                                         entries: page5.entries)) {
                         gridChipBody(id: id)
                     }
                     .buttonStyle(.plain)
