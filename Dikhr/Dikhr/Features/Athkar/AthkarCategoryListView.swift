@@ -121,6 +121,7 @@ struct AthkarCategoryListView: View {
                 case "myAthkar": MyAthkarView()
                 case "khatmah": KhatmahView()
                 case "qibla": QiblaView()
+                case "salahPage": AthkarSalahPageView()
                 case "favorites": AthkarFavoritesView()
                 case "search": AthkarSearchView()
                 case "more": AthkarSectionsListView()
@@ -316,7 +317,10 @@ struct AthkarCategoryListView: View {
                         path.append("favorites")
                     case .counter:
                         DeepLinkRouter.shared.pendingTab = "counter"
-                    case .all, .prayer:
+                    case .prayer:
+                        // الصلاة chip pushes the full-screen prayer page.
+                        path.append("salahPage")
+                    case .all:
                         chip = c
                     }
                 } label: {
