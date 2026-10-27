@@ -784,7 +784,9 @@ struct AthkarFavoritesView: View {
     @State private var categories: [AthkarCategory] = []
 
     var body: some View {
-        List {
+        ZStack {
+            Color(red: 0.04, green: 0.04, blue: 0.045).ignoresSafeArea()
+            List {
             ForEach(favoriteGroups, id: \.category.id) { group in
                 Section(group.category.localizedTitle(settings.lang)) {
                     ForEach(group.entries, id: \.id) { entry in
@@ -803,20 +805,19 @@ struct AthkarFavoritesView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            }
         }
         .overlay {
             if favoriteGroups.isEmpty {
-                VStack(spacing: 10) {
-                    Image(systemName: "star")
-                        .font(.largeTitle)
-                        .foregroundStyle(.secondary)
-                    Text(settings.t("لا يوجد دعاء في المفضلة. لإضافة دعاء هنا اذهب إلى صفحة الأذكار واضغط على زر النجمة.",
-                                    "No favorites yet. Open an athkar page and tap the star to add one."))
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
-                }
+                Text(settings.t("لا يوجد دعاء في المفضلة. لإضافة دعاء هنا اذهب إلى صفحة الأذكار ونضغط على زر النجمة.",
+                                "No favorites yet. Open an athkar page and tap the star to add one."))
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity, alignment: .top)
+                    .padding(.horizontal, 28)
+                    .padding(.top, 14)
             }
         }
         .navigationTitle(settings.t("المفضلة", "Favorites"))
