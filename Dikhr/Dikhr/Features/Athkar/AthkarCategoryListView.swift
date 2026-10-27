@@ -725,12 +725,6 @@ struct AthkarCategoryListView: View {
                     .foregroundStyle(color)
             }
             Spacer()
-            if let count = gridCount(id) {
-                Text("\(count)")
-                    .font(.caption2.bold())
-                    .monospacedDigit()
-                    .foregroundStyle(color.opacity(0.45))
-            }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 15)
