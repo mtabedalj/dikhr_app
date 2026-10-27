@@ -30,11 +30,19 @@ extension AthkarCategory {
 
 // MARK: - Athkar home (matches the original's أذكار tab home)
 //
-// Live capture ground truth (/tmp/athkar_live_1.png):
+// Live capture ground truth (/tmp/athkar_live_1.png, /tmp/step_home.png):
 //   chips: المنوعة / الصلاة / القبلة / المفضلة / العداد (Vision OCR of the live app)
-//   banner verse: "وَعَلَىٰ رَبِّهِمْ يَتَوَكَّلُونَ"
-//   strip: العشاء 07:52 right, الفجر 06:42 left, hijri medallion center
-//   countdown row gold: "الفجر بعد 6:54:09" (next prayer, live HH:MM:SS)
+//   header sky is SOLAR-STATE aware: night = deep-navy starfield, day =
+//   bright blue gradient + soft sun glare top-center + faint cloud haze.
+//   banner verse by state: night "وَعَلَىٰ رَبِّهِمْ يَتَوَكَّلُونَ",
+//   day "إِنَّ ٱلۡمُتَّقِينَ فِي جَنَّٰتٖ وَعُيُونٍ" (Quran.DB exact form,
+//   OCR'd from the day capture as جنّاتِ).
+//   strip neighbors swap by prayer: night left العشاء 07:52 right الفجر 06:42,
+//   day right العصر 04:06 left الظهر 01:18 → right = NEXT prayer,
+//   left = PREVIOUS (first child leads right in RTL).
+//   countdown row gold: "الفجر بعد 6:54:09" (next prayer, live HH:MM:SS);
+//   within ~1h after an adhan it is replaced by the alert banner
+//   "مضى على أذان الظهر 53 دقيقة" (format key 'مضى على أذان %@ %@').
 //   "المصحف" gold pill + bookmark badge, "متابعة العبادات" card with progress ring
 //   two-column pastel category pill grid + green "المزيد" chip
 //
@@ -127,6 +135,7 @@ struct AthkarCategoryListView: View {
                 case "followupPage": AthkarFollowupView()
                 case "search": AthkarSearchPageView()
                 case "more": AthkarSectionsListView()
+                case "adhanHistory": AdhanHistoryView()
                 default: AthkarSearchPageView()
                 }
             }
@@ -175,9 +184,49 @@ struct AthkarCategoryListView: View {
         ringRatio = Double(done) / 4.0
     }
 
-    // MARK: 1. night-sky header
+    // MARK: 1. sky header (night starfield / day sun glare, solar-state aware)
+
+    /// Night between isha and the next fajr (HomeCards.resolveTimes), day in
+    /// between — picks the header sky AND its verse, like the original.
+    private var isNightSky: Bool {
+        guard let t = prayerTimes else { return true }
+        return now < t.fajr || now > t.isha
+    }
+
+    /// Header banner verse per state (captured verbatim; day form matches
+    /// Dikhr's Quran.sqlite 15:45/51:15 exactly).
+    private var headerVerse: String {
+        isNightSky ? "وَعَلَىٰ رَبِّهِمْ يَتَوَكَّلُونَ"
+                   : "إِنَّ ٱلۡمُتَّقِينَ فِي جَنَّٰتٖ وَعُيُونٍ"
+    }
 
     private var skyHeader: some View {
+        ZStack {
+            if isNightSky { nightSky } else { daySky }
+            VStack(spacing: 0) {
+                HStack(spacing: 12) {
+                    Spacer()
+                    homeCircleButton("gearshape.fill", action: {
+                        showSettingsSheet = true
+                    })
+                    homeCircleButton("magnifyingglass", action: { path.append("search") })
+                    homeCircleButton("bookmark", action: { path.append("favorites") })
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 52)
+                Spacer()
+                Text(headerVerse)
+                    .font(.custom("KFGQPCHAFSUthmanicScript-Bold", size: 30))
+                    .foregroundStyle(Color(red: 0.97, green: 0.95, blue: 0.90))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 6)
+            }
+        }
+    }
+
+    /// Night sky: deep-navy gradient + deterministic star specks.
+    private var nightSky: some View {
         ZStack {
             LinearGradient(colors: [Color(red: 0.10, green: 0.105, blue: 0.19),
                                     Color(red: 0.07, green: 0.075, blue: 0.14),
@@ -193,25 +242,41 @@ struct AthkarCategoryListView: View {
                 }
             }
             .frame(height: 265)
-            VStack(spacing: 0) {
-                HStack(spacing: 12) {
-                    Spacer()
-                    homeCircleButton("gearshape.fill", action: {
-                        showSettingsSheet = true
-                    })
-                    homeCircleButton("magnifyingglass", action: { path.append("search") })
-                    homeCircleButton("bookmark", action: { path.append("favorites") })
+        }
+    }
+
+    /// Day sky (pixel-sampled from /tmp/step_home.png): blue ramp darkest at
+    /// the top (35,63,128) → soft (74,115,183) at the bottom, a compact warm
+    /// sun glare just under the top-center edge plus a wide pale haze, and
+    /// faint cloud wisps near the top.
+    private var daySky: some View {
+        ZStack {
+            LinearGradient(colors: [Color(red: 0.137, green: 0.247, blue: 0.502),
+                                    Color(red: 0.29, green: 0.45, blue: 0.72)],
+                           startPoint: .top, endPoint: .bottom)
+                .frame(height: 265)
+            GeometryReader { geo in
+                ZStack {
+                    RadialGradient(colors: [Color(red: 0.93, green: 0.93, blue: 0.85).opacity(0.85),
+                                            Color.clear],
+                                   center: UnitPoint(x: 0.49, y: 0.05),
+                                   startRadius: 0,
+                                   endRadius: geo.size.width * 0.15)
+                    RadialGradient(colors: [Color(red: 0.85, green: 0.90, blue: 0.97).opacity(0.30),
+                                            Color.clear],
+                                   center: UnitPoint(x: 0.49, y: 0.16),
+                                   startRadius: 0,
+                                   endRadius: geo.size.width * 0.34)
+                    ForEach(Array(Self.clouds.enumerated()), id: \.offset) { _, cloud in
+                        Ellipse()
+                            .fill(Color.white.opacity(cloud.opacity))
+                            .frame(width: geo.size.width * cloud.w, height: cloud.h)
+                            .blur(radius: cloud.blur)
+                            .position(x: geo.size.width * cloud.x, y: 265 * cloud.y)
+                    }
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 52)
-                Spacer()
-                Text("وَعَلَىٰ رَبِّهِمْ يَتَوَكَّلُونَ")
-                    .font(.custom("KFGQPCHAFSUthmanicScript-Bold", size: 30))
-                    .foregroundStyle(Color(red: 0.97, green: 0.95, blue: 0.90))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 6)
             }
+            .frame(height: 265)
         }
     }
 
@@ -223,6 +288,15 @@ struct AthkarCategoryListView: View {
         (0.81, 0.62, 1.3, 0.30), (0.87, 0.13, 2.6, 0.60), (0.93, 0.34, 1.4, 0.40),
         (0.14, 0.62, 1.3, 0.28), (0.44, 0.86, 1.6, 0.25), (0.71, 0.82, 1.2, 0.22),
         (0.95, 0.75, 1.5, 0.25)
+    ]
+
+    /// Deterministic faint cloud wisps for the day sky (fractions of the header).
+    private static let clouds: [(x: Double, y: Double, w: Double, h: Double, opacity: Double, blur: Double)] = [
+        (0.28, 0.14, 0.30, 30, 0.05, 10),
+        (0.72, 0.11, 0.26, 26, 0.04, 10),
+        (0.50, 0.28, 0.42, 34, 0.06, 12),
+        (0.83, 0.32, 0.22, 22, 0.04, 10),
+        (0.14, 0.26, 0.24, 24, 0.045, 10)
     ]
 
     private func homeCircleButton(_ symbol: String, action: @escaping () -> Void) -> some View {
@@ -244,15 +318,20 @@ struct AthkarCategoryListView: View {
                 .fill(Color(red: 0.075, green: 0.075, blue: 0.088))
                 .frame(height: 58)
             HStack(spacing: 8) {
-                // RTL: first child leads on the right — عشاء right, فجر left (like the capture)
-                if let times = prayerTimes {
-                    stripTime(settings.t(PrayerKind.isha.arabicName, PrayerKind.isha.englishName),
-                              hhColonMM(times.isha))
-                    Spacer()
-                    medallion
-                    Spacer()
-                    stripTime(settings.t(PrayerKind.fajr.arabicName, PrayerKind.fajr.englishName),
-                              hhColonMM(times.fajr))
+                // RTL: first child leads on the RIGHT = NEXT prayer, the second
+                // side (left) = PREVIOUS — day capture: العصر 04:06 right,
+                // الظهر 01:18 left; night capture: الفجر 06:42 right,
+                // العشاء 07:52 left.
+                if let next = nextPrayer {
+                    stripTime(settings.t(next.kind.arabicName, next.kind.englishName),
+                              hhColonMM(next.date))
+                }
+                Spacer()
+                medallion
+                Spacer()
+                if let previous = previousPrayer {
+                    stripTime(settings.t(previous.kind.arabicName, previous.kind.englishName),
+                              hhColonMM(previous.date))
                 }
             }
             .padding(.horizontal, 16)
@@ -346,9 +425,24 @@ struct AthkarCategoryListView: View {
         .background(Color(red: 0.028, green: 0.028, blue: 0.033))
     }
 
-    // MARK: 4. gold countdown row
+    // MARK: 4. gold countdown row / since-adhan banner
+    //
+    // The first-hour slot under the chip row: within ~1h after an adhan the
+    // original shows the alert banner "مضى على أذان الظهر 53 دقيقة"
+    // (ar.lproj format key 'مضى على أذان %@ %@', minutes-in-words), otherwise
+    // the gold HH:MM:SS countdown to the next prayer (night capture).
 
+    @ViewBuilder
     private var countdownRow: some View {
+        if let previous = previousPrayer,
+           (1...59).contains(sinceAdhanMinutes(previous.date)) {
+            sinceAdhanBanner(previous)
+        } else {
+            goldCountdown
+        }
+    }
+
+    private var goldCountdown: some View {
         HStack(spacing: 8) {
             if let next = nextPrayer {
                 Text(settings.lang == .arabic
@@ -367,21 +461,92 @@ struct AthkarCategoryListView: View {
         .padding(.vertical, 16)
     }
 
-    private var nextPrayer: (kind: PrayerKind, date: Date)? {
-        guard let method = HomeCards.resolveMethod(settings: settings) else { return nil }
-        func upcoming(on date: Date) -> (kind: PrayerKind, date: Date)? {
+    /// Whole minutes elapsed since the previous prayer's athan.
+    private func sinceAdhanMinutes(_ date: Date) -> Int {
+        Int(now.timeIntervalSince(date) / 60)
+    }
+
+    /// Minutes-in-words; 53 → "53 دقيقة" (matches the capture's banner).
+    private func adhanMinutesWords(_ minutes: Int) -> String {
+        switch minutes {
+        case 1: return "دقيقة"
+        case 2: return "دقيقتين"
+        case 3...10: return "\(minutes) دقائق"
+        default: return "\(minutes) دقيقة"
+        }
+    }
+
+    private func adhanMinutesWordsEN(_ minutes: Int) -> String {
+        minutes == 1 ? "1 minute" : "\(minutes) minutes"
+    }
+
+    /// Alert banner: dark card, white bold text, thin red accent bar on the
+    /// leading edge (right, RTL-first child — like the capture), tap → the
+    /// elapsed-adhan history page.
+    private func sinceAdhanBanner(_ previous: StripEvent) -> some View {
+        NavigationLink(value: "adhanHistory") {
+            HStack(spacing: 10) {
+                Rectangle()
+                    .fill(Color(red: 0.80, green: 0.17, blue: 0.20))
+                    .clipShape(Capsule())
+                    .frame(width: 3.5, height: 30)
+                Text(settings.lang == .arabic
+                     ? String(format: "مضى على أذان %@ %@",
+                              settings.t(previous.kind.arabicName, previous.kind.englishName),
+                              adhanMinutesWords(sinceAdhanMinutes(previous.date)))
+                     : String(format: "%@ athan was %@ ago",
+                              settings.t(previous.kind.arabicName, previous.kind.englishName),
+                              adhanMinutesWordsEN(sinceAdhanMinutes(previous.date))))
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity)
+            .background(RoundedRectangle(cornerRadius: 10)
+                .fill(Color(red: 0.055, green: 0.055, blue: 0.062)))
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal)
+        .padding(.top, 8)
+    }
+
+    private struct StripEvent: Equatable {
+        let kind: PrayerKind
+        let date: Date
+    }
+
+    /// Previous (most recent past) and next (first upcoming) prayer around
+    /// now — mirrors AthkarSalahPageView's intervalPrayer: prayers only
+    /// (sunrise excluded) spanning yesterday/today/tomorrow, so late-night
+    /// hours resolve to yesterday's isha → today's fajr. Drives the strip's
+    /// neighbor times AND the since-adhan banner.
+    private var stripEvents: (prev: StripEvent?, next: StripEvent?) {
+        guard let method = HomeCards.resolveMethod(settings: settings) else { return (nil, nil) }
+        func events(on date: Date) -> [StripEvent] {
             let t = PrayerTimesEngine.calculate(
                 method: method, lat: settings.currentCity.lat, lng: settings.currentCity.lng,
                 date: date, timeZone: .current)
-            // Prayers only (sunrise excluded): matches the capture's "الفجر بعد".
-            let events: [(PrayerKind, Date)] = [
-                (.fajr, t.fajr), (.dhuhr, t.dhuhr), (.asr, t.asr),
-                (.maghrib, t.maghrib), (.isha, t.isha)]
-            return events.first { $0.1 > now }
+            return [StripEvent(kind: .fajr, date: t.fajr),
+                    StripEvent(kind: .dhuhr, date: t.dhuhr),
+                    StripEvent(kind: .asr, date: t.asr),
+                    StripEvent(kind: .maghrib, date: t.maghrib),
+                    StripEvent(kind: .isha, date: t.isha)]
         }
-        return upcoming(on: now)
-            ?? upcoming(on: Calendar.current.date(byAdding: .day, value: 1,
-                                                  to: Calendar.current.startOfDay(for: now)) ?? now)
+        let cal = Calendar.current
+        var all = events(on: cal.date(byAdding: .day, value: -1, to: now) ?? now)
+        all += events(on: now)
+        all += events(on: cal.date(byAdding: .day, value: 1, to: now) ?? now)
+        return (all.last { $0.date <= now }, all.first { $0.date > now })
+    }
+
+    private var previousPrayer: StripEvent? { stripEvents.prev }
+
+    private var nextPrayer: (kind: PrayerKind, date: Date)? {
+        stripEvents.next.map { ($0.kind, $0.date) }
     }
 
     private func hms(_ interval: TimeInterval) -> String {
