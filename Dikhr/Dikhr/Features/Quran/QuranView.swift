@@ -629,11 +629,20 @@ struct QuranSurahView: View {
     let surah: QuranSurah
     @State private var ayahs: [QuranAyah] = []
     @State private var mushafMode = true
+    /// Verse tapped inside the mushaf HTML flow (the medallion spans post
+    /// `dikhrVerse`) — presents the same VerseModal the list rows use.
+    @State private var pendingVerse: MushafHTMLView.PendingVerseTap?
 
     var body: some View {
         Group {
             if mushafMode {
-                MushafHTMLView(surah: surah, ayahs: ayahs, bookmarkedAyahs: bookmarkedKeys())
+                MushafHTMLView(surah: surah, ayahs: ayahs, bookmarkedAyahs: bookmarkedKeys(),
+                               onVerseTap: { _, ayah, _ in
+                                   guard let tapped = ayahs.first(where: { $0.number == ayah }) else { return }
+                                   pendingVerse = MushafHTMLView.PendingVerseTap(
+                                       surahID: tapped.surahID, ayahID: tapped.number,
+                                       page: tapped.page)
+                               })
                     .ignoresSafeArea(edges: .bottom)
             } else {
                 ScrollView {
@@ -661,6 +670,16 @@ struct QuranSurahView: View {
                 }
             }
         }
+        // Same VerseModal sheet the AyahRow presents, mirrored for the mushaf
+        // flow: the bookmark state is read fresh from QuranBookmarkStore (its
+        // add/remove inside the modal keeps the store the source of truth).
+        .sheet(item: $pendingVerse) { tapped in
+            if let aayah = ayahs.first(where: { $0.number == tapped.ayahID }) {
+                VerseModal(aayah: aayah, surah: surah,
+                           bookmarked: bookmarkState(surahID: tapped.surahID,
+                                                     ayah: tapped.ayahID))
+            }
+        }
         .onAppear {
             guard ayahs.isEmpty else { return }
             ayahs = QuranDatabase.shared.ayahs(surahID: surah.id)
@@ -674,6 +693,13 @@ struct QuranSurahView: View {
         Set(QuranBookmarkStore.bookmarks()
             .filter { $0.surah == surah.id }
             .map { "\($0.surah):\($0.ayah)" })
+    }
+
+    /// Fresh, non-owned bookmark binding for the mushaf-flow VerseModal: reads
+    /// the store directly; the modal's own add/remove toggles it.
+    private func bookmarkState(surahID: Int, ayah: Int) -> Binding<Bool> {
+        Binding(get: { QuranBookmarkStore.isBookmarked(surahID: surahID, ayah: ayah) },
+                set: { _ in })
     }
 
     private var mushafHeader: some View {
@@ -739,7 +765,7 @@ struct AyahRow: View {
                 Divider()
                 Text(settings.t("التفسير الميسر", "Clear Tafsir"))
                     .font(.footnote.bold())
-                    .foregroundStyle(.accent)
+                    .foregroundStyle(Color.accentColor)
                 Text(taf)
                     .font(.callout)
                     .lineSpacing(8)

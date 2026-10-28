@@ -13,20 +13,62 @@ struct MushafHTMLView: UIViewRepresentable {
     /// One-shot search jump target shown in THIS surah (or nil): that ayah's
     /// text and circled marker render inside one olive-gold `.jump` block.
     var jumpAyah: QuranJumpTarget.Point? = nil
+    /// Verse tap from the HTML flow: (surah, ayah, page) posted by every ayah's
+    /// marker span (the original opens its verse modal by tapping the verse in
+    /// the mushaf too). Nil = taps ignored.
+    var onVerseTap: ((Int, Int, Int) -> Void)? = nil
 
     static func arabicDigits(_ n: Int) -> String {
         let arabic = ["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"]
         return String(n).map { $0.isNumber ? arabic[Int(String($0)) ?? 0] ?? "" : String($0) }.joined()
     }
 
+    /// The onclick attribute attached to an ayah's own spans (medallion and
+    /// highlighted spans): posts the ayah to the `dikhrVerse` message handler
+    /// without touching the justified inline flow. Attribute only — no quotes
+    /// inside, no braces to escape.
+    static func verseTapAttribute(surah: Int, ayah: Int, page: Int) -> String {
+        " onclick=\"window.webkit.messageHandlers.dikhrVerse" +
+            ".postMessage({surah:\(surah),ayah:\(ayah),page:\(page)})\""
+    }
+
+    /// The pending verse-tap payload bridged to SwiftUI (Identifiable for
+    /// `.sheet(item:)` on the surah screen and the printed pages).
+    struct PendingVerseTap: Identifiable {
+        let surahID: Int
+        let ayahID: Int
+        let page: Int
+        var id: String { "\(surahID):\(ayahID)" }
+    }
+
     func makeCoordinator() -> Coordinator { Coordinator() }
 
-    final class Coordinator {
+    final class Coordinator: NSObject, WKScriptMessageHandler {
         var currentHTML: String?
+        var onVerseTap: ((Int, Int, Int) -> Void)?
+
+        func userContentController(_ userContentController: WKUserContentController,
+                                   didReceive message: WKScriptMessage) {
+            guard message.name == "dikhrVerse",
+                  let dict = message.body as? [String: Any]
+            else { return }
+            guard let surah = intOf(dict["surah"]),
+                  let ayah = intOf(dict["ayah"]),
+                  let page = intOf(dict["page"]) else { return }
+            onVerseTap?(surah, ayah, page)
+        }
+
+        /// JS numerals arrive as NSNumber (Int or Double); Int(truncating:) covers both.
+        func intOf(_ v: Any?) -> Int? {
+            if let n = v as? NSNumber { return Int(truncating: n) }
+            return v as? Int
+        }
     }
 
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
+        configuration.userContentController.add(context.coordinator, name: "dikhrVerse")
+        context.coordinator.onVerseTap = onVerseTap
         let webview = WKWebView(frame: .zero, configuration: configuration)
         webview.isOpaque = false
         webview.backgroundColor = .clear
@@ -41,6 +83,7 @@ struct MushafHTMLView: UIViewRepresentable {
     }
 
     func updateUIView(_ webview: WKWebView, context: Context) {
+        context.coordinator.onVerseTap = onVerseTap
         let html = MushafHTMLView.html(surah: surah, ayahs: ayahs,
                                        bookmarkedAyahs: bookmarkedAyahs,
                                        jumpAyah: jumpAyah)
@@ -54,15 +97,19 @@ struct MushafHTMLView: UIViewRepresentable {
                      bookmarkedAyahs: Set<String> = [],
                      jumpAyah: QuranJumpTarget.Point? = nil) -> String {
         let flow = ayahs.map { ayah -> String in
-            let marker = "<span class='m'>" + arabicDigits(ayah.number) + "</span>"
+            // Verse modal tap: the onclick rides the existing spans (the
+            // medallion here; also the `.jump`/`.bkm` spans) so the justified
+            // flow, markers and highlight CSS stay untouched.
+            let tap = verseTapAttribute(surah: surah.id, ayah: ayah.number, page: ayah.page)
+            let marker = "<span class='m'\(tap)>" + arabicDigits(ayah.number) + "</span>"
             // One-shot search jump: text + marker inside one olive-gold block.
             if let jump = jumpAyah, jump.surah == surah.id, jump.ayah == ayah.number {
-                return "<span class='jump'>" + ayah.text + " " + marker + "</span> "
+                return "<span class='jump'\(tap)>" + ayah.text + " " + marker + "</span> "
             }
             // Bookmarked verse: `<mark>`-styled span == the original's
             // `.highlight{background-color:yellow}` CSS.
             if bookmarkedAyahs.contains("\(surah.id):\(ayah.number)") {
-                return "<span class='bkm'>" + ayah.text + "</span> " + marker + " "
+                return "<span class='bkm'\(tap)>" + ayah.text + "</span> " + marker + " "
             }
             return ayah.text + " " + marker + " "
         }.joined()

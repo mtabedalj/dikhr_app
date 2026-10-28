@@ -15,6 +15,9 @@ struct QuranPagesView: View {
     /// user turns the page so a later swipe back renders without the highlight.
     @State private var jumpTarget: QuranJumpTarget.Point?
     @State private var appearedPage: Int = 0
+    /// Verse tapped on a printed page (the medallion spans post `dikhrVerse`)
+    /// — presents the VerseModal over the pages like the original.
+    @State private var pendingVerse: MushafHTMLView.PendingVerseTap?
 
     init(startPage: Int? = nil) {
         // Khatmah: restore the last-read page on open; the المصحف chips'
@@ -28,7 +31,11 @@ struct QuranPagesView: View {
             Divider().overlay(QuranPalette.darkGreen.opacity(0.18))
             TabView(selection: Binding(get: { page }, set: { page = $0 })) {
                 ForEach(1...604, id: \.self) { number in
-                    QuranPageCell(page: number, selection: page, store: store, jumpTarget: jumpTarget)
+                    QuranPageCell(page: number, selection: page, store: store, jumpTarget: jumpTarget,
+                                  onVerseTap: { surah, ayah, tappedPage in
+                                      pendingVerse = MushafHTMLView.PendingVerseTap(
+                                          surahID: surah, ayahID: ayah, page: tappedPage)
+                                  })
                         .tag(number)
                 }
             }
@@ -62,6 +69,22 @@ struct QuranPagesView: View {
         }
         .sheet(isPresented: $showSurahList) {
             QuranSurahJumpSheet(surahs: surahs) { page = $0 }
+        }
+        // Verse modal over the printed pages, mirrored from the surah screen's
+        // AyahRow sheet: the ayah comes from the tapped page's own rows, the
+        // bookmark state is read fresh from QuranBookmarkStore (the modal's
+        // add/remove keeps its highlight in the next paint).
+        .sheet(item: $pendingVerse) { tapped in
+            if let aayah = store.page(tapped.page).ayahs
+                .first(where: { $0.surahID == tapped.surahID && $0.number == tapped.ayahID }),
+               let surah = surahs.first(where: { $0.id == tapped.surahID })
+                ?? QuranDatabase.shared.surah(tapped.surahID) {
+                VerseModal(aayah: aayah, surah: surah,
+                           bookmarked: Binding(
+                               get: { QuranBookmarkStore.isBookmarked(
+                                   surahID: tapped.surahID, ayah: tapped.ayahID) },
+                               set: { _ in }))
+            }
         }
         .onChange(of: page) { _, newPage in
             QuranPagesTracker.save(newPage)
@@ -134,6 +157,8 @@ struct QuranPageCell: View {
     /// One-shot search jump (surah+ayah) for this appearance, or nil. Only the
     /// page actually holding that ayah renders the olive-gold highlight.
     var jumpTarget: QuranJumpTarget.Point?
+    /// Verse tap bridged up to QuranPagesView's sheet: (surah, ayah, page).
+    var onVerseTap: ((Int, Int, Int) -> Void)? = nil
 
     /// "surah:ayah" bookmark keys on this page — drives the yellow highlight.
     private func bookmarkedKeys(_ ayahs: [QuranAyah]) -> Set<String> {
@@ -156,7 +181,8 @@ struct QuranPageCell: View {
                                                   "Juz \(data.juzID)"),
                              bandSurahName: data.surahNames,
                              bookmarkedAyahs: bookmarkedKeys(data.ayahs),
-                             jumpAyah: jump)
+                             jumpAyah: jump,
+                             onVerseTap: onVerseTap)
         } else {
             ZStack {
                 QuranPalette.paper.ignoresSafeArea()

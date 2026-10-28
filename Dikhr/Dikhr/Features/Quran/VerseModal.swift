@@ -193,8 +193,13 @@ struct VerseModal: View {
             ScrollView {
                 VStack(spacing: 18) {
                     // The verse itself (Uthmanic, RTL, green markers per palette).
-                    Text(aayah.text + " " + "\(MushafHTMLView.arabicDigits(aayah.number))\u{06DD}")
-                        .font(.quranUthmani)
+                    // Drawn ring instead of the font-composed ayah sign:
+                    // SwiftUI shaping splits U+06DD into a second empty ring.
+                    HStack(spacing: 8) {
+                        Text(aayah.text)
+                            .font(.quranUthmani)
+                        AthkarCircledNumber(value: aayah.number, diameter: 22)
+                    }
                         .lineSpacing(14)
                         .multilineTextAlignment(.leading)
                         .frame(maxWidth: .infinity, alignment: .leading)

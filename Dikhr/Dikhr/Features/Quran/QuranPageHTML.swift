@@ -37,16 +37,22 @@ enum QuranPageHTML {
                 }
             }
             flow += run.ayahs.map { ayah -> String in
-                let marker = "<span class='m'>" + arabicDigits(ayah.number) + "</span>"
+                // Verse modal tap: the onclick rides the ayah's own spans
+                // (medallion, and `.jump`/`.bkm` when highlighted) — attribute
+                // only, no flow or CSS change.
+                let tap = MushafHTMLView.verseTapAttribute(surah: run.surahID,
+                                                           ayah: ayah.number,
+                                                           page: page)
+                let marker = "<span class='m'\(tap)>" + arabicDigits(ayah.number) + "</span>"
                 // One-shot search jump: text + marker inside ONE olive-gold
                 // rounded block (`.jump`), like the original capture.
                 if let jump = jumpAyah, jump.surah == run.surahID, jump.ayah == ayah.number {
-                    return "<span class='jump'>" + ayah.text + " " + marker + "</span> "
+                    return "<span class='jump'\(tap)>" + ayah.text + " " + marker + "</span> "
                 }
                 // Bookmarked verse: `<mark>`-styled yellow highlight
                 // (the original's `.highlight{background-color:yellow}`).
                 if bookmarkedAyahs.contains("\(run.surahID):\(ayah.number)") {
-                    return "<span class='bkm'>" + ayah.text + "</span> " + marker + " "
+                    return "<span class='bkm'\(tap)>" + ayah.text + "</span> " + marker + " "
                 }
                 return ayah.text + " " + marker + " "
             }.joined()
@@ -141,15 +147,38 @@ struct QuranPageWebView: UIViewRepresentable {
     /// One-shot search jump target contained on THIS page (or nil): renders the
     /// olive-gold `.jump` block behind that ayah's text and circled marker.
     var jumpAyah: QuranJumpTarget.Point? = nil
+    /// Verse tap from the printed page, as (surah, ayah, page) — same handler
+    /// pattern as MushafHTMLView. Nil = taps ignored.
+    var onVerseTap: ((Int, Int, Int) -> Void)? = nil
 
     func makeCoordinator() -> Coordinator { Coordinator() }
 
-    final class Coordinator {
+    final class Coordinator: NSObject, WKScriptMessageHandler {
         var currentHTML: String?
+        var onVerseTap: ((Int, Int, Int) -> Void)?
+
+        func userContentController(_ userContentController: WKUserContentController,
+                                   didReceive message: WKScriptMessage) {
+            guard message.name == "dikhrVerse",
+                  let dict = message.body as? [String: Any]
+            else { return }
+            guard let surah = intOf(dict["surah"]),
+                  let ayah = intOf(dict["ayah"]),
+                  let page = intOf(dict["page"]) else { return }
+            onVerseTap?(surah, ayah, page)
+        }
+
+        /// JS numerals arrive as NSNumber (Int or Double); Int(truncating:) covers both.
+        func intOf(_ v: Any?) -> Int? {
+            if let n = v as? NSNumber { return Int(truncating: n) }
+            return v as? Int
+        }
     }
 
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
+        configuration.userContentController.add(context.coordinator, name: "dikhrVerse")
+        context.coordinator.onVerseTap = onVerseTap
         let webview = WKWebView(frame: .zero, configuration: configuration)
         webview.isOpaque = false
         webview.backgroundColor = .clear
@@ -166,6 +195,7 @@ struct QuranPageWebView: UIViewRepresentable {
     }
 
     func updateUIView(_ webview: WKWebView, context: Context) {
+        context.coordinator.onVerseTap = onVerseTap
         let html = QuranPageHTML.pageHTML(page: page, ayahs: ayahs,
                                           juzLabel: juzLabel,
                                           bandSurahName: bandSurahName,
