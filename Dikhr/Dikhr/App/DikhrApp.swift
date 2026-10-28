@@ -39,6 +39,7 @@ struct DikhrApp: App {
         DikhrFontRegistration.register()
         QuickActions.register()
         FirebaseBootstrap.configure()
+        WatchPhoneBridge.shared.activate()
     }
 
     var body: some Scene {

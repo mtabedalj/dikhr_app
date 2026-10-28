@@ -60,6 +60,11 @@ struct SettingsSectionsView: View {
             Section(settings.t("تنبيهات الأذكار والأذان", "Athkar & Adhan Alerts")) {
                 MomentsSchedulerToggleRow()
             }
+            Section(settings.t("الساعة", "Watch")) {
+                NavigationLink(settings.t("استخدم في الساعة", "Use on the Watch")) {
+                    WatchSectionsSettingsView()
+                }
+            }
             Section(settings.t("اللغة", "Language")) {
                 Picker(settings.t("لغة الواجهة", "App Language"), selection: $settings.lang) {
                     Text("العربية").tag(SettingsStore.Language.arabic)

@@ -6,11 +6,18 @@ import SQLite3
 /// block, swiped through page by page like a real mushaf (RTL).
 struct QuranPagesView: View {
     @EnvironmentObject private var settings: SettingsStore
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var store = QuranPageStore()
     @State private var page: Int
     @State private var surahs: [QuranSurah] = []
     @State private var showPageList = false
     @State private var showSurahList = false
+    /// The "…" menu's jump-to-page field (accepts Western or Arabic digits).
+    @State private var jumpText = ""
+    @State private var showJumpInput = false
+    /// The "…" menu's share: snapshot image (or a text fallback).
+    @State private var shareItems: [Any] = []
+    @State private var showShare = false
     /// The one-shot search jump target for this appearance; cleared once the
     /// user turns the page so a later swipe back renders without the highlight.
     @State private var jumpTarget: QuranJumpTarget.Point?
@@ -27,7 +34,33 @@ struct QuranPagesView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            pageBar
+            MushafPageHeader(
+                ribbonLabel: settings.t("السور", "Surahs"),
+                centerText: MushafHTMLView.arabicDigits(page),
+                juzText: juzTitle,
+                onBack: { dismiss() },
+                onRibbon: { showSurahList = true },
+                actionsMenu: {
+                    Button { shareCurrentPage() } label: {
+                        Label(settings.t("مشاركة الصفحة", "Share page"),
+                              systemImage: "square.and.arrow.up")
+                    }
+                    Button { showPageList = true } label: {
+                        Label(settings.t("قائمة الصفحات", "Page List"),
+                              systemImage: "list.number")
+                    }
+                    Button { showSurahList = true } label: {
+                        Label(settings.t("السور", "Surahs"), systemImage: "book.closed")
+                    }
+                    Button {
+                        jumpText = ""
+                        showJumpInput = true
+                    } label: {
+                        Label(settings.t("انتقل إلى صفحة", "Go to page"),
+                              systemImage: "arrow.right.circle")
+                    }
+                }
+            )
             Divider().overlay(QuranPalette.darkGreen.opacity(0.18))
             TabView(selection: Binding(get: { page }, set: { page = $0 })) {
                 ForEach(1...604, id: \.self) { number in
@@ -45,30 +78,28 @@ struct QuranPagesView: View {
         }
         .background(QuranPalette.paper.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button {
-                        showPageList = true
-                    } label: {
-                        Label(settings.t("قائمة الصفحات", "Page List"), systemImage: "list.number")
-                    }
-                    Button {
-                        showSurahList = true
-                    } label: {
-                        Label(settings.t("السور", "Surahs"), systemImage: "book.closed")
-                    }
-                } label: {
-                    Image(systemName: "square.grid.3x3")
-                        .foregroundStyle(QuranPalette.darkGreen)
-                }
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showPageList) {
             QuranPageListSheet(store: store, current: page) { page = $0 }
         }
         .sheet(isPresented: $showSurahList) {
             QuranSurahJumpSheet(surahs: surahs) { page = $0 }
+        }
+        .sheet(isPresented: $showShare) {
+            MushafShareSheet(items: shareItems)
+        }
+        // Jump-to-page: the alert's numeric field (Western or Arabic-Indic
+        // digits both parse).
+        .alert(settings.t("انتقل إلى صفحة", "Go to page"), isPresented: $showJumpInput) {
+            TextField(settings.t("١ – ٦٠٤", "1 – 604"), text: $jumpText)
+                .keyboardType(.numberPad)
+            Button(settings.t("انتقل", "Go")) {
+                if let number = MushafNumberInput.parse(jumpText),
+                   (1...604).contains(number) {
+                    page = number
+                }
+            }
+            Button(settings.t("إلغاء", "Cancel"), role: .cancel) {}
         }
         // Verse modal over the printed pages, mirrored from the surah screen's
         // AyahRow sheet: the ayah comes from the tapped page's own rows, the
@@ -109,41 +140,30 @@ struct QuranPagesView: View {
         }
     }
 
-    // MARK: - Page navigation bar
+    // MARK: - The "…" menu actions
 
-    private var pageBar: some View {
-        HStack(spacing: 12) {
-            // Juz indicator (leading = right in RTL, like the mushaf band).
-            HStack(spacing: 4) {
-                Text("❁")
-                Text(juzTitle)
-                    .font(.caption.bold())
+    /// Share the visible page: snapshot its registered webview (takeSnapshot →
+    /// activity sheet), falling back to a text position line.
+    private func shareCurrentPage() {
+        Task { @MainActor in
+            if let image = await MushafWebViewRegistry.shared.snapshot(
+                key: MushafWebViewRegistry.pageKey(page)) {
+                shareItems = [image]
+            } else {
+                let label = settings.t("صفحة \(QuranPageHTML.arabicDigits(page))",
+                                       "Page \(page)")
+                shareItems = ["\(label) — \(store.page(page).surahNames)"]
             }
-            .foregroundStyle(QuranPalette.darkGreen)
-
-            Spacer()
-
-            Button {
-                showPageList = true
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "list.number")
-                    Text(settings.t("صفحة \(QuranPageHTML.arabicDigits(page))",
-                                    "Page \(QuranPageHTML.arabicDigits(page))"))
-                        .font(.headline)
-                }
-                .foregroundStyle(QuranPalette.darkGreen)
-            }
-            .accessibilityLabel(settings.t("الانتقال إلى صفحة", "Go to page"))
+            showShare = true
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .background(QuranPalette.paper)
     }
 
     private var juzTitle: String {
-        DikhrStrings.tr("الجزء \(QuranPageHTML.arabicDigits(store.page(page).juzID))",
-                        "Juz \(store.page(page).juzID)")
+        let juzID = store.page(page).juzID > 0
+            ? store.page(page).juzID
+            : max(1, (page - 1) / 20 + 1)
+        return DikhrStrings.tr("جزء \(QuranPageHTML.arabicDigits(juzID))",
+                               "Juz \(juzID)")
     }
 }
 

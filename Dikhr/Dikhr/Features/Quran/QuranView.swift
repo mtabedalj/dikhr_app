@@ -334,30 +334,15 @@ struct QuranView: View {
     }
 
     private func surahTile(_ surah: QuranSurah) -> some View {
+        // The mini play lives in an OVERLAY sibling of the NavigationLink, not
+        // nested in its label: tapping it toggles playback only — a nested
+        // Button can push the link as well. Its pause/play icon reflects WHICH
+        // surah is playing (isListenPlaying), and tapping another tile while
+        // playing SWITCHES the shared VerseAudioPlayer (togglePlay sees a
+        // different surah and plays it instead of pausing).
         NavigationLink(value: surah) {
             HStack(spacing: 4) {
-                VStack(spacing: 14) {   // badge column rides the near edge
-                    Text("\(surah.id)")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 30, height: 30)
-                        .background(RoundedRectangle(cornerRadius: 9)
-                            .fill(Color.white.opacity(0.12)))
-                    Button {
-                        if let ayah = firstAyah(of: surah) {
-                            audio.togglePlay(aayah: ayah)
-                        }
-                    } label: {
-                        Image(systemName: isListenPlaying(surah)
-                              ? "pause.fill" : "play.fill")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundStyle(.white.opacity(0.85))
-                            .frame(width: 28, height: 28)
-                            .background(RoundedRectangle(cornerRadius: 9)
-                                .fill(Color.white.opacity(0.10)))
-                    }
-                    .buttonStyle(.plain)
-                }
+                Color.clear.frame(width: 30)  // badge column rides as the overlay
                 VStack(spacing: 6) {
                     Text(opener(for: surah))
                         .font(.quranUthmani)
@@ -382,6 +367,31 @@ struct QuranView: View {
             .contentShape(RoundedRectangle(cornerRadius: 22))
         }
         .buttonStyle(.plain)
+        .overlay(alignment: .leading) {  // leading in RTL = the near edge
+            VStack(spacing: 14) {
+                Text("\(surah.id)")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 30, height: 30)
+                    .background(RoundedRectangle(cornerRadius: 9)
+                        .fill(Color.white.opacity(0.12)))
+                Button {
+                    if let ayah = firstAyah(of: surah) {
+                        audio.togglePlay(aayah: ayah)
+                    }
+                } label: {
+                    Image(systemName: isListenPlaying(surah)
+                          ? "pause.fill" : "play.fill")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .frame(width: 28, height: 28)
+                        .background(RoundedRectangle(cornerRadius: 9)
+                            .fill(Color.white.opacity(0.10)))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.leading, 12)
+        }
     }
 
     /// Every tile opens with the Basmala per the capture; Tawbah (no
@@ -630,25 +640,51 @@ struct QuranSearchSheet: View {
 
 struct QuranSurahView: View {
     @EnvironmentObject private var settings: SettingsStore
+    @Environment(\.dismiss) private var dismiss
     let surah: QuranSurah
+    /// The surah flow's mushaf header needs the pages table (جزء of the start
+    /// page); its own connection keeps Data/ untouched.
+    @StateObject private var pageStore = QuranPageStore()
     @State private var ayahs: [QuranAyah] = []
     @State private var mushafMode = true
     @State private var bookmarked: Set<String> = []
     /// Verse tapped inside the mushaf HTML flow (the medallion spans post
     /// `dikhrVerse`) — presents the same VerseModal the list rows use.
     @State private var pendingVerse: MushafHTMLView.PendingVerseTap?
+    @State private var shareItems: [Any] = []
+    @State private var showShare = false
 
     var body: some View {
         Group {
             if mushafMode {
-                MushafHTMLView(surah: surah, ayahs: ayahs, bookmarkedAyahs: bookmarked,
-                               onVerseTap: { _, ayah, _ in
-                                   guard let tapped = ayahs.first(where: { $0.number == ayah }) else { return }
-                                   pendingVerse = MushafHTMLView.PendingVerseTap(
-                                       surahID: tapped.surahID, ayahID: tapped.number,
-                                       page: tapped.page)
-                               })
-                    .ignoresSafeArea(edges: .bottom)
+                VStack(spacing: 0) {
+                    MushafPageHeader(
+                        ribbonLabel: surah.name,
+                        centerText: MushafHTMLView.arabicDigits(surahStartPage),
+                        juzText: juzText(page: surahStartPage),
+                        onBack: { dismiss() },
+                        actionsMenu: {
+                            Button { beginShare() } label: {
+                                Label(settings.t("مشاركة الصفحة", "Share page"),
+                                      systemImage: "square.and.arrow.up")
+                            }
+                            Button { mushafMode = false } label: {
+                                Label(settings.t("عرض القائمة", "List view"),
+                                      systemImage: "list.bullet.rectangle")
+                            }
+                        }
+                    )
+                    MushafHTMLView(surah: surah, ayahs: ayahs, bookmarkedAyahs: bookmarked,
+                                   onVerseTap: { _, ayah, _ in
+                                       guard let tapped = ayahs.first(where: { $0.number == ayah }) else { return }
+                                       pendingVerse = MushafHTMLView.PendingVerseTap(
+                                           surahID: tapped.surahID, ayahID: tapped.number,
+                                           page: tapped.page)
+                                   })
+                        .ignoresSafeArea(edges: .bottom)
+                }
+                .background(QuranPalette.paper.ignoresSafeArea())
+                .toolbar(.hidden, for: .navigationBar)
             } else {
                 ScrollView {
                     VStack(spacing: 10) {
@@ -662,16 +698,16 @@ struct QuranSurahView: View {
                     }
                 }
                 .background(Color(.systemGroupedBackground))
-            }
-        }
-        .navigationTitle(surah.name)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    mushafMode.toggle()
-                } label: {
-                    Image(systemName: mushafMode ? "list.bullet.rectangle" : "text.book.closed")
+                .navigationTitle(surah.name)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            mushafMode = true
+                        } label: {
+                            Image(systemName: "text.book.closed")
+                        }
+                    }
                 }
             }
         }
@@ -685,6 +721,9 @@ struct QuranSurahView: View {
                                                      ayah: tapped.ayahID))
             }
         }
+        .sheet(isPresented: $showShare) {
+            MushafShareSheet(items: shareItems)
+        }
         .onAppear {
             if ayahs.isEmpty { ayahs = QuranDatabase.shared.ayahs(surahID: surah.id) }
             StreaksStore.setQuran(true)
@@ -692,6 +731,38 @@ struct QuranSurahView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .dikhrBookmarksChanged)) { _ in
             bookmarked = bookmarkedKeys()
+        }
+    }
+
+    /// The start printed page (the header's center number; the capture shows
+    /// "٩٧" bold inside the ornate capsule).
+    private var surahStartPage: Int {
+        ayahs.first.map(\.page) ?? max(surah.page, 1)
+    }
+
+    /// "جزء N" from the pages table; (page − 1) / 20 + 1 as a fallback.
+    private func juzText(page: Int) -> String {
+        let juz = pageStore.page(page).juzID > 0
+            ? pageStore.page(page).juzID
+            : max(1, (page - 1) / 20 + 1)
+        return DikhrStrings.tr("جزء \(MushafHTMLView.arabicDigits(juz))",
+                               "Juz \(juz)")
+    }
+
+    /// The "…" menu's share row: snapshot the registered mushaf webview
+    /// (WKWebView.takeSnapshot) and share the image; falls back to a text
+    /// position line if no webview is alive yet.
+    private func beginShare() {
+        Task { @MainActor in
+            if let image = await MushafWebViewRegistry.shared.snapshot(
+                key: MushafWebViewRegistry.surahKey(surah.id)) {
+                shareItems = [image]
+            } else {
+                shareItems = ["\(surah.name) — " +
+                              DikhrStrings.tr("صفحة \(surahStartPage)",
+                                              "Page \(surahStartPage)")]
+            }
+            showShare = true
         }
     }
 

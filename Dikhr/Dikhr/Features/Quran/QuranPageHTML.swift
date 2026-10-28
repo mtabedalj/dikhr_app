@@ -76,7 +76,9 @@ enum QuranPageHTML {
         }
         *{ margin:0; padding:0; box-sizing:border-box; }
         html,body{ background:var(--paper); color:var(--ink);
-          font-family:'Sch',serif; -webkit-text-size-adjust:100%; }
+          font-family:'Sch',serif; -webkit-text-size-adjust:100%;
+          -webkit-user-select:text; user-select:text;
+          -webkit-touch-callout:default; }
         .page{ padding:14px 16px 26px; }
         .band{ display:flex; align-items:center; justify-content:space-between;
           color:var(--faded); font-size:13px;
@@ -184,6 +186,10 @@ struct QuranPageWebView: UIViewRepresentable {
         webview.backgroundColor = .clear
         webview.scrollView.backgroundColor = .clear
         webview.scrollView.contentInsetAdjustmentBehavior = .never
+        // Registered under this printed page's key (weak registry): neighbour
+        // flip webviews coexist, and the "…" share snapshots only the visible one.
+        MushafWebViewRegistry.shared.register(
+            webview, key: MushafWebViewRegistry.pageKey(page))
         let html = QuranPageHTML.pageHTML(page: page, ayahs: ayahs,
                                           juzLabel: juzLabel,
                                           bandSurahName: bandSurahName,

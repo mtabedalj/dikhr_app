@@ -74,6 +74,10 @@ struct MushafHTMLView: UIViewRepresentable {
         webview.backgroundColor = .clear
         webview.scrollView.backgroundColor = .clear
         webview.scrollView.contentInsetAdjustmentBehavior = .never
+        // Registered (weakly) so the mushaf header's "…" menu can takeSnapshot
+        // this flow for the share action.
+        MushafWebViewRegistry.shared.register(
+            webview, key: MushafWebViewRegistry.surahKey(surah.id))
         let html = MushafHTMLView.html(surah: surah, ayahs: ayahs,
                                        bookmarkedAyahs: bookmarkedAyahs,
                                        jumpAyah: jumpAyah)
@@ -130,7 +134,9 @@ struct MushafHTMLView: UIViewRepresentable {
         }
         *{ margin:0; padding:0; box-sizing:border-box; }
         html,body{ background:var(--paper); color:var(--ink);
-          font-family:'Sch',serif; -webkit-text-size-adjust:100%; }
+          font-family:'Sch',serif; -webkit-text-size-adjust:100%;
+          -webkit-user-select:text; user-select:text;
+          -webkit-touch-callout:default; }
         .page{ padding:20px 16px 48px; }
         .bismillah{ font-family:'UtB'; font-size:24px; color:var(--green);
           text-align:center; margin-bottom:14px; }

@@ -75,7 +75,10 @@ final class VerseAudioPlayer: NSObject, ObservableObject {
     private var player: AVPlayer?
     private var playedFolder = ""
     private var playedKey = ""
-    private(set) var currentlyPlaying: (surah: Int, ayah: Int)?
+    /// Published so per-tile play/pause icons re-render when the playing
+    /// surah SWITCHES (tapping a different tile while playing moves playback);
+    /// isPlaying alone doesn't change on a switch.
+    @Published private(set) var currentlyPlaying: (surah: Int, ayah: Int)?
 
     static func remoteURL(reciter: String, surah: Int, ayah: Int) -> URL {
         let key = String(format: "%03d%03d", surah, ayah)
