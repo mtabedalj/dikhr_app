@@ -70,3 +70,27 @@ Phase structure:
 5. Streaks/check-in, settings, themes/icons, My Athkar editor (simple first)
 6. Extensions: widgets, App Intents, Prayer Focus (DeviceActivity/ManagedSettings), Watch app
 7. IAP (Pro) + Firebase wiring as integrations
+## UI-parity crawl loop (branch parity/ui-loop, 2026-10-26/27)
+Method: live screencapture of the installed Athkar app's window + AppleScript
+(System Events) coordinate clicks to walk its UI autonomously; each divergence
+fixed by subagents and committed.
+
+- Brand أذكار home: night-sky starfield header, QR verse banner, gear/search/
+  bookmark round buttons, hijri medallion framed by today's Fajr/Isha, filter
+  chips (المنوعة/الصلاة/القبلة/المفضلة/العداد), gold live next-prayer countdown,
+  المصحف shortcut, worship-progress ring, pastel two-column category grid.
+- Full المنوعة grid: wide comprehensive-athkar row, summary/sick/ease/verse-
+  tafsir rows, verbatim hadith ticker (6 authentics from the original binary),
+  gold-crown Pro divider + locked rows (dates/loved ones/kids/umrah/hajj/cards/
+  booklet/widget duas).
+- الصلاة chip page: black minimal night-prayer screen (live HH:MM:SS clock,
+  right-edge interval progress bar, PREVIOUS prayer top block + next-prayer
+  bottom block w/ 12h م/ص suffixes, gold seconds countdown, hijri yyyy-mm-dd +
+  city footer, glowing moon + back chevron).
+- القبلة pages: no-compass fallback = dark MKMapView + gray location circle +
+  green geodesic ray 300 km along the qibla bearing + verbatim disclaimer +
+  عرض اتجاه إلى ماكة recenter bar; compass path preserved.
+- المفضلة page: black screen + verbatim empty-state.
+- المتابعة والعداد chip page: tracker ring + 4 streak tiles (current/best) +
+  compact counter (CounterStore's increment path, haptics, 3s reset).
+Branch: parity/ui-loop (58cdb5c..d696305, 7 commits) — ahead of main.

@@ -1,114 +1,638 @@
 import SwiftUI
 
+extension Notification.Name {
+    static let dikhrBookmarksChanged = Notification.Name("dikhr-bookmarks-changed")
+}
+import SQLite3
+
+// MARK: - المصحف — Quran tab root, rebuilt from live capture /tmp/ath_quran.png
+//
+// The real Athkar app's المصحف page: near-black page; bold white "المصحف"
+// beside a round ">" back chevron at the far edge; three round chrome buttons
+// top-opposite (gear → settings sheet, share, search). Under it a 2x2 card
+// block: two dark stat cards (right: "آخر آية · النساء 139 · ص 100" over a
+// "اليوم · 6:00 م" read stamp; left: "آخر صفحة · النساء 101" over its own
+// stamp; both collapse to "—" before any reading) then two action cards
+// (right: ختمة → KhatmahView; left: استمع سورة الفاتحة with a round play).
+// Four filter chips switch the body grid:
+//   السور    → 3-column surah tiles: Uthmanic Basmala opener on top (the
+//              capture shows the same بسم الله glyph on every tile; Tawbah —
+//              the basmala-less surah — falls back to its first verse's own
+//              words), a number badge + mini play on the tile's edge and gray
+//              meta rows "مكية ،آياتها : N" / "الصفحة N"; tap pushes the
+//              surah, the mini play streams its first ayah.
+//   الأجزاء  → 30 juz tiles with printed-page ranges → mushaf page.
+//   الأحزاب  → 60 hizb tiles (Quran.sqlite's hizb table: start page of the
+//              start ayah, end page = next hizb's start − 1).
+//   الصفحات  → 604 numbered page tiles → QuranPagesView(startPage:).
+// Tile mini-plays and the استمع button share VerseAudioPlayer (VerseModal's
+// everyayah streaming, playing a surah's first ayah), like the original's
+// "استمع" resume-from-last-position card.
+// Dark chrome + RTL direction are forced like the other parity pages.
+
+private let quranTabGold = Color(red: 0.79, green: 0.65, blue: 0.35)
+
 struct QuranView: View {
     @EnvironmentObject private var settings: SettingsStore
     @State private var surahs: [QuranSurah] = []
-    @State private var query = ""
-    @State private var results: [QuranAyah] = []
+    @State private var tawbahOpener = ""
+    @State private var chip: Chip = .surahs
     @State private var path: [QuranSurah] = []
-    @State private var lastRead: (surah: Int, ayah: Int)? = QuranBookmarkStore.lastRead()
+    @State private var showSearch = false
+    @State private var showSettings = false
+    @StateObject private var audio = VerseAudioPlayer.shared
+    @StateObject private var pageStore = QuranPageStore()
+    @StateObject private var hizbStore = QuranHizbStore()
+
+    enum Chip: CaseIterable, Identifiable {
+        case surahs, ajza, ahzab, pages
+        var id: Self { self }
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
-            List {
-                if let lastRead, let surah = surahs.first(where: { $0.id == lastRead.surah }) {
-                    Section(settings.t("آخِر قراءة", "Last Read")) {
-                        Button {
-                            path = [surah]
-                        } label: {
-                            HStack {
-                                Image(systemName: "bookmark.fill")
-                                    .foregroundStyle(.accent)
-                                VStack(alignment: .leading) {
-                                    Text(surah.name).font(.headline)
-                                    Text(settings.t("الآية \(lastRead.ayah)", "Ayah \(lastRead.ayah)"))
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                    }
-                }
-                if query.isEmpty {
-                    Section {
-                        ForEach(surahs) { surah in
-                            NavigationLink(value: surah) {
-                                HStack {
-                                    ZStack {
-                                        Image(systemName: "seal.fill")
-                                            .font(.title3)
-                                            .foregroundStyle(.tint.opacity(0.30))
-                                        Text("\(surah.id)")
-                                            .font(.caption2.bold())
-                                    }
-                                    Text(surah.name).font(.title3)
-                                    Spacer()
-                                    VStack(alignment: .trailing) {
-                                        Text(settings.t("\(surah.ayahCount) آية", "\(surah.ayahCount) ayahs"))
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                        Text(settings.t("صفحة \(surah.page)", "Page \(surah.page)"))
-                                            .font(.caption2)
-                                            .foregroundStyle(.tertiary)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else if !results.isEmpty {
-                    Section(settings.t("نتائج البحث", "Search Results")) {
-                        ForEach(results) { ayah in
-                            Button {
-                                if let s = surahs.first(where: { $0.id == ayah.surahID }) {
-                                    path = [s]
-                                }
-                            } label: {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(ayah.text)
-                                        .font(.system(size: 19, design: .serif))
-                                        .foregroundStyle(.primary)
-                                        .lineSpacing(8)
-                                    Text(surahLabel(ayah))
-                                        .font(.caption2)
-                                        .foregroundStyle(.tint)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
+            ZStack {
+                Color.black.ignoresSafeArea()
+                VStack(spacing: 0) {
+                    topBar
+                    statCards
+                    actionCards
+                    chipBar
+                    chipContent
                 }
             }
-            .navigationTitle(settings.t("القرآن", "Quran"))
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        QuranPagesView()
-                    } label: {
-                        Label(settings.t("المصحف المطبوع", "Printed Mushaf"), systemImage: "book.pages")
-                    }
-                }
-            }
-            .searchable(text: $query, prompt: settings.t("ابحث في القرآن", "Search the Quran"))
-            .onChange(of: query) { _, q in
-                results = q.count > 1 ? QuranDatabase.shared.search(q) : []
-            }
+            .environment(\.layoutDirection, .rightToLeft)
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: QuranSurah.self) { surah in
                 QuranSurahView(surah: surah)
             }
-            .onAppear {
-                if surahs.isEmpty { surahs = QuranDatabase.shared.surahs() }
-                if let push = ProcessInfo.processInfo.environment["DIKHR_SURAH"],
-                   let id = Int(push), let surah = surahs.first(where: { $0.id == id }) {
-                    path = [surah]
+            .navigationDestination(for: QuranPageTarget.self) { target in
+                QuranPagesView(startPage: target.page)
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsSheetView()
+            }
+            .sheet(isPresented: $showSearch) {
+                QuranSearchSheet(surahs: surahs) { surah in path = [surah] }
+            }
+            .preferredColorScheme(.dark)
+            .onAppear { load() }
+        }
+    }
+
+    // MARK: chrome (title + ">" back far edge; gear / share / search opposite)
+
+    private var topBar: some View {
+        HStack(spacing: 12) {
+            // Back: pops any pushed detail pages (the tab's own stack root
+            // itself has nothing to pop, like the original's stack top).
+            Button { path = [] } label: { chromeCircle("chevron.forward") }
+            Text(settings.t("المصحف", "Mushaf"))
+                .font(.system(size: 24, weight: .bold))
+                .foregroundStyle(.white)
+            Spacer()
+            Button { showSettings = true } label: { chromeCircle("gearshape") }
+            ShareLink(item: shareText) { chromeCircle("square.and.arrow.down") }
+            Button { showSearch = true } label: { chromeCircle("magnifyingglass") }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 6)
+        .padding(.bottom, 14)
+    }
+
+    private func chromeCircle(_ symbol: String) -> some View {
+        Image(systemName: symbol)
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 40, height: 40)
+            .background(Circle().fill(Color.white.opacity(0.10)))
+            .contentShape(Circle())
+    }
+
+    // MARK: stat cards (last verse — right; last mushaf page — left)
+
+    private var statCards: some View {
+        HStack(alignment: .top, spacing: 12) {
+            verseStatCard
+            pageStatCard
+        }
+        .padding(.horizontal, 16)
+    }
+
+    private var verseStatCard: some View {
+        statCard(line: verseStatLine, stamp: verseStatStamp)
+    }
+
+    private var pageStatCard: some View {
+        statCard(line: pageStatLine, stamp: pageStatStamp)
+    }
+
+    private func statCard(line: String, stamp: String) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(line)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.leading)
+            Text(stamp)
+                .font(.system(size: 13))
+                .foregroundStyle(Color(white: 0.55))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(RoundedRectangle(cornerRadius: 16)
+            .fill(Color.white.opacity(0.055))
+            .overlay(RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.white.opacity(0.10))))
+    }
+
+    /// "آخر آية · النساء 139 · ص 100" — Dikhr's recorded last-read verse; if
+    /// none yet, approximated from the last-read page's first ayah.
+    private var verseStatLine: String {
+        if let lastRead = QuranBookmarkStore.lastRead() {
+            let name = surahs.first(where: { $0.id == lastRead.surah })?.name ?? ""
+            if let page = QuranDatabase.shared.ayahIDs(surahID: lastRead.surah,
+                                                       number: lastRead.ayah)?.page {
+                return settings.t("آخر آية", "Last verse") + " · \(name) \(lastRead.ayah) · ص \(page)"
+            }
+        }
+        if let page = QuranPagesTracker.storedPage(),
+           let first = pageStore.page(page).ayahs.first {
+            let name = surahs.first(where: { $0.id == first.surahID })?.name ?? ""
+            return settings.t("آخر آية", "Last verse") + " · \(name) \(first.number) · ص \(page)"
+        }
+        return settings.t("آخر آية", "Last verse") + " · —"
+    }
+
+    private var verseStatStamp: String {
+        if let date = QuranBookmarkStore.lastReadDate() { return stamp(date) }
+        if let date = QuranPagesTracker.lastReadDate() { return stamp(date) }
+        return "—"
+    }
+
+    /// "آخر صفحة · النساء 101" — QuranPagesTracker's last-read mushaf page,
+    /// labeled with the surah printed on that page (pages table).
+    private var pageStatLine: String {
+        if let page = QuranPagesTracker.storedPage() {
+            let name = pageStore.page(page).surahNames
+            if !name.isEmpty {
+                return settings.t("آخر صفحة", "Last page") + " · \(name) \(page)"
+            }
+            return settings.t("آخر صفحة", "Last page") + " · \(page)"
+        }
+        return settings.t("آخر صفحة", "Last page") + " · —"
+    }
+
+    private var pageStatStamp: String {
+        QuranPagesTracker.lastReadDate().map(stamp) ?? "—"
+    }
+
+    // MARK: action cards (ختمة — right; استمع — left)
+
+    private var actionCards: some View {
+        HStack(spacing: 12) {
+            khatmahCard
+            listenCard
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 12)
+    }
+
+    private var khatmahCard: some View {
+        NavigationLink {
+            KhatmahView()
+        } label: {
+            ZStack {
+                Text(settings.t("ختمة", "Khatmah"))
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(.white)
+                HStack {
+                    Image(systemName: "text.book.closed.fill")
+                        .font(.title3)
+                        .foregroundStyle(quranTabGold)
+                    Spacer()
                 }
+            }
+            .frame(maxWidth: .infinity, minHeight: 78)
+            .padding(.horizontal, 14)
+            .background(RoundedRectangle(cornerRadius: 16).fill(Color(white: 0.12)))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var listenCard: some View {
+        HStack(spacing: 10) {
+            if let surah = listenSurah {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(settings.t("استمع", "Listen"))
+                        .font(.system(size: 19, weight: .bold))
+                        .foregroundStyle(.white)
+                    Text(settings.t("سورة \(surah.name)", "Surah \(surah.name)"))
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color(white: 0.55))
+                }
+                Spacer()
+                Button {
+                    if let ayah = firstAyah(of: surah) {
+                        audio.togglePlay(aayah: ayah)
+                    }
+                } label: {
+                    Image(systemName: isListenPlaying(surah) ? "pause.fill" : "play.fill")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .background(Circle().fill(Color.white.opacity(0.16)))
+                }
+                .buttonStyle(.plain)
+            } else {
+                Spacer()
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: 78)
+        .padding(.horizontal, 14)
+        .background(RoundedRectangle(cornerRadius: 16).fill(Color(white: 0.105)))
+    }
+
+    /// The استمع target: the last-read surah, or سورة الفاتحة (as captured).
+    private var listenSurah: QuranSurah? {
+        let id = QuranBookmarkStore.lastRead()?.surah ?? 1
+        return surahs.first(where: { $0.id == id }) ?? surahs.first
+    }
+
+    private func isListenPlaying(_ surah: QuranSurah) -> Bool {
+        if case (surah.id, 1)? = audio.currentlyPlaying, audio.isPlaying { return true }
+        return false
+    }
+
+    /// Lightweight stand-in ayah for playback (VerseAudioPlayer only uses
+    /// surah + ayah number; text stays empty so no DB read is wasted).
+    private func firstAyah(of surah: QuranSurah) -> QuranAyah? {
+        guard let ids = QuranDatabase.shared.ayahIDs(surahID: surah.id, number: 1) else {
+            return nil
+        }
+        return QuranAyah(id: ids.id, surahID: surah.id, number: 1, text: "", page: ids.page)
+    }
+
+    // MARK: filter chips (السور / الأجزاء / الأحزاب / الصفحات)
+
+    private var chipBar: some View {
+        HStack(spacing: 10) {
+            ForEach(Chip.allCases) { candidate in
+                Button { chip = candidate } label: {
+                    Text(chipLabel(candidate))
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, minHeight: 42)
+                        .background(Capsule().fill(
+                            chip == candidate ? Color.white.opacity(0.20)
+                                              : Color.white.opacity(0.055)))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 14)
+        .padding(.bottom, 12)
+    }
+
+    private func chipLabel(_ chip: Chip) -> String {
+        switch chip {
+        case .surahs: return settings.t("السور", "Surahs")
+        case .ajza: return settings.t("الأجزاء", "Juz")
+        case .ahzab: return settings.t("الأحزاب", "Hizb")
+        case .pages: return settings.t("الصفحات", "Pages")
+        }
+    }
+
+    @ViewBuilder
+    private var chipContent: some View {
+        ScrollView {
+            switch chip {
+            case .surahs: surahGrid
+            case .ajza: juzGrid
+            case .ahzab: hizbGrid
+            case .pages: pagesGrid
             }
         }
     }
 
-    private func surahLabel(_ ayah: QuranAyah) -> String {
-        if let s = surahs.first(where: { $0.id == ayah.surahID }) {
-            return settings.t("\(s.name) \u{2022} آية \(ayah.number)",
-                              "\(s.name) \u{2022} ayah \(ayah.number)")
+    private var threeColumns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 12), count: 3)
+    }
+
+    // MARK: السور grid
+
+    private var surahGrid: some View {
+        LazyVGrid(columns: threeColumns, spacing: 14) {
+            ForEach(surahs) { surah in
+                surahTile(surah)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 6)
+        .padding(.bottom, 40)
+    }
+
+    private func surahTile(_ surah: QuranSurah) -> some View {
+        // The mini play lives in an OVERLAY sibling of the NavigationLink, not
+        // nested in its label: tapping it toggles playback only — a nested
+        // Button can push the link as well. Its pause/play icon reflects WHICH
+        // surah is playing (isListenPlaying), and tapping another tile while
+        // playing SWITCHES the shared VerseAudioPlayer (togglePlay sees a
+        // different surah and plays it instead of pausing).
+        NavigationLink(value: surah) {
+            HStack(spacing: 4) {
+                Color.clear.frame(width: 30)  // badge column rides as the overlay
+                VStack(spacing: 6) {
+                    Text(opener(for: surah))
+                        .font(.quranUthmani)
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.4)
+                        .frame(maxWidth: .infinity)
+                    Text("\(surah.revelationType) ،آياتها : \(surah.ayahCount)")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color(white: 0.55))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                    Text(settings.t("الصفحة \(surah.page)", "Page \(surah.page)"))
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Color(white: 0.55))
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .padding(12)
+            .frame(height: 152)
+            .background(RoundedRectangle(cornerRadius: 22).fill(Color(white: 0.105)))
+            .contentShape(RoundedRectangle(cornerRadius: 22))
+        }
+        .buttonStyle(.plain)
+        .overlay(alignment: .leading) {  // leading in RTL = the near edge
+            VStack(spacing: 14) {
+                Text("\(surah.id)")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 30, height: 30)
+                    .background(RoundedRectangle(cornerRadius: 9)
+                        .fill(Color.white.opacity(0.12)))
+                Button {
+                    if let ayah = firstAyah(of: surah) {
+                        audio.togglePlay(aayah: ayah)
+                    }
+                } label: {
+                    Image(systemName: isListenPlaying(surah)
+                          ? "pause.fill" : "play.fill")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(.white.opacity(0.85))
+                        .frame(width: 28, height: 28)
+                        .background(RoundedRectangle(cornerRadius: 9)
+                            .fill(Color.white.opacity(0.10)))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.leading, 12)
+        }
+    }
+
+    /// Every tile opens with the Basmala per the capture; Tawbah (no
+    /// basmala in mushaf) shows its first verse's own opening words.
+    private func opener(for surah: QuranSurah) -> String {
+        if surah.id == 9, !tawbahOpener.isEmpty { return tawbahOpener }
+        return "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ"
+    }
+
+    // MARK: الأجزاء grid
+
+    private var juzGrid: some View {
+        LazyVGrid(columns: threeColumns, spacing: 14) {
+            ForEach(pageStore.juzSections()) { section in
+                let pages = section.rows.map(\.page)
+                NavigationLink(value: QuranPageTarget(page: pages.first ?? 1)) {
+                    collectionTile(title: section.name, range: pages)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 6)
+        .padding(.bottom, 40)
+    }
+
+    // MARK: الأحزاب grid
+
+    private var hizbGrid: some View {
+        LazyVGrid(columns: threeColumns, spacing: 14) {
+            ForEach(hizbStore.items) { hizb in
+                NavigationLink(value: QuranPageTarget(page: hizb.startPage)) {
+                    collectionTile(title: settings.t("الحزب \(hizb.hizb)",
+                                                     "Hizb \(hizb.hizb)"),
+                                   range: [hizb.startPage, hizb.endPage])
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 6)
+        .padding(.bottom, 40)
+    }
+
+    private func collectionTile(title: String, range: [Int]) -> some View {
+        VStack(spacing: 8) {
+            Text(title)
+                .font(.system(size: 17, weight: .bold))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            if range.count >= 2 {
+                Text(settings.t("الصفحات \(range[0]) – \(range[1])",
+                                "Pages \(range[0]) – \(range[1])"))
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color(white: 0.55))
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: 96)
+        .padding(.horizontal, 10)
+        .background(RoundedRectangle(cornerRadius: 20).fill(Color(white: 0.105)))
+    }
+
+    // MARK: الصفحات grid
+
+    private var pagesGrid: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10),
+                                 count: 4),
+                  spacing: 10) {
+            ForEach(1...604, id: \.self) { page in
+                NavigationLink(value: QuranPageTarget(page: page)) {
+                    Text("\(page)")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, minHeight: 62)
+                        .background(RoundedRectangle(cornerRadius: 14)
+                            .fill(Color(white: 0.105)))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 6)
+        .padding(.bottom, 40)
+    }
+
+    // MARK: data + stamps
+
+    private func load() {
+        if surahs.isEmpty { surahs = QuranDatabase.shared.surahs() }
+        hizbStore.loadIfNeeded()
+        if tawbahOpener.isEmpty,
+           let first = QuranDatabase.shared.ayahs(surahID: 9).first {
+            tawbahOpener = first.text.split(separator: " ")
+                .prefix(7).joined(separator: " ")
+        }
+        if let push = ProcessInfo.processInfo.environment["DIKHR_SURAH"],
+           let id = Int(push), let surah = surahs.first(where: { $0.id == id }) {
+            path = [surah]
+        }
+    }
+
+    /// "اليوم · 6:00 م" — the captured stamp row (yesterday and date fallbacks).
+    private func stamp(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        let meridiem = Calendar.current.component(.hour, from: date) < 12 ? " ص" : " م"
+        let time = formatter.string(from: date) + meridiem
+        if Calendar.current.isDateInToday(date) {
+            return settings.t("اليوم", "Today") + " · \(time)"
+        }
+        if Calendar.current.isDateInYesterday(date) {
+            return settings.t("أمس", "Yesterday") + " · \(time)"
+        }
+        let day = DateFormatter()
+        day.dateFormat = "d/M"
+        return day.string(from: date) + " · \(time)"
+    }
+
+    /// ShareLink of the reading position (honest mapping of the original's
+    /// download/share chrome button).
+    private var shareText: String {
+        let position: String
+        if let page = QuranPagesTracker.storedPage() {
+            let name = pageStore.page(page).surahNames
+            position = name.isEmpty
+                ? settings.t("صفحة \(page)", "Page \(page)")
+                : "\(name) · \(settings.t("صفحة \(page)", "Page \(page)"))"
+        } else {
+            position = settings.t("المصحف", "Mushaf")
+        }
+        return settings.t("آخر قراءة بالمسحف —", "Last reading —") + " " + position
+    }
+}
+
+/// Push target for mushaf pages chosen from the الأجزاء / الأحزاب / الصفحات
+/// chips (Int is already the QuranSurah navigation value's payload shape).
+struct QuranPageTarget: Hashable {
+    let page: Int
+}
+
+// MARK: - Hizb quarters (Quran.sqlite's `hizb` table — Data/ stays untouched)
+
+/// 60 hizb tiles: start page via the start ayah's printed page, end page =
+/// the next hizb's start − 1 (the last hizb runs to 604). Own read-only
+/// connection, loaded once.
+final class QuranHizbStore: ObservableObject {
+    struct HizbInfo: Identifiable {
+        let hizb: Int
+        let startPage: Int
+        let endPage: Int
+        var id: Int { hizb }
+    }
+
+    private(set) var items: [HizbInfo] = []
+
+    func loadIfNeeded() {
+        guard items.isEmpty else { return }
+        guard let url = Bundle.main.url(forResource: "Quran", withExtension: "sqlite") else {
+            return
+        }
+        var pointer: OpaquePointer?
+        let flags = SQLITE_OPEN_READONLY | SQLITE_OPEN_FULLMUTEX
+        guard sqlite3_open_v2(url.path, &pointer, flags, nil) == SQLITE_OK,
+              let db = pointer else { return }
+        defer { sqlite3_close_v2(db) }
+        var statement: OpaquePointer?
+        let sql = """
+            SELECT h.hizb, a.page FROM hizb h
+            JOIN ayah a ON a.surah_id = h.sura_start AND a.number = h.aya_start
+            ORDER BY h.hizb
+            """
+        guard sqlite3_prepare_v2(db, sql, -1, &statement, nil) == SQLITE_OK else { return }
+        defer { sqlite3_finalize(statement) }
+        var starts: [(hizb: Int, page: Int)] = []
+        while sqlite3_step(statement) == SQLITE_ROW {
+            starts.append((Int(sqlite3_column_int64(statement, 0)),
+                           Int(sqlite3_column_int64(statement, 1))))
+        }
+        items = starts.enumerated().map { index, row in
+            let end = index + 1 < starts.count ? starts[index + 1].page - 1 : 604
+            return HizbInfo(hizb: row.hizb, startPage: row.page,
+                            endPage: max(row.page, end))
+        }
+    }
+}
+
+// MARK: - In-tab Quran search (kept as a sheet from the search chrome button)
+
+/// The previous Quran tab's search list, preserved: type to filter Quran text,
+/// tap a result to push its surah (the sheet dismisses first).
+struct QuranSearchSheet: View {
+    @EnvironmentObject private var settings: SettingsStore
+    @Environment(\.dismiss) private var dismiss
+    let surahs: [QuranSurah]
+    let onPick: (QuranSurah) -> Void
+    @State private var query = ""
+    @State private var results: [QuranAyah] = []
+
+    var body: some View {
+        NavigationStack {
+            List {
+                if !query.isEmpty && results.isEmpty {
+                    Text(settings.t("لا توجد نتائج", "No results"))
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(results) { ayah in
+                    Button {
+                        if let surah = surahs.first(where: { $0.id == ayah.surahID }) {
+                            dismiss()
+                            onPick(surah)
+                        }
+                    } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(ayah.text)
+                                .font(.system(size: 19, design: .serif))
+                                .foregroundStyle(.primary)
+                                .lineSpacing(8)
+                            Text(label(for: ayah))
+                                .font(.caption2)
+                                .foregroundStyle(.tint)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .searchable(text: $query, prompt: settings.t("ابحث في القرآن", "Search the Quran"))
+            .navigationTitle(settings.t("البحث في المصحف", "Search the Quran"))
+            .navigationBarTitleDisplayMode(.inline)
+            .onChange(of: query) { _, newQuery in
+                results = newQuery.count > 1 ? QuranDatabase.shared.search(newQuery) : []
+            }
+        }
+        .preferredColorScheme(.dark)
+    }
+
+    private func label(for ayah: QuranAyah) -> String {
+        if let surah = surahs.first(where: { $0.id == ayah.surahID }) {
+            return settings.t("\(surah.name) \u{2022} آية \(ayah.number)",
+                              "\(surah.name) \u{2022} ayah \(ayah.number)")
         }
         return ""
     }
@@ -116,15 +640,51 @@ struct QuranView: View {
 
 struct QuranSurahView: View {
     @EnvironmentObject private var settings: SettingsStore
+    @Environment(\.dismiss) private var dismiss
     let surah: QuranSurah
+    /// The surah flow's mushaf header needs the pages table (جزء of the start
+    /// page); its own connection keeps Data/ untouched.
+    @StateObject private var pageStore = QuranPageStore()
     @State private var ayahs: [QuranAyah] = []
     @State private var mushafMode = true
+    @State private var bookmarked: Set<String> = []
+    /// Verse tapped inside the mushaf HTML flow (the medallion spans post
+    /// `dikhrVerse`) — presents the same VerseModal the list rows use.
+    @State private var pendingVerse: MushafHTMLView.PendingVerseTap?
+    @State private var shareItems: [Any] = []
+    @State private var showShare = false
 
     var body: some View {
         Group {
             if mushafMode {
-                MushafHTMLView(surah: surah, ayahs: ayahs, bookmarkedAyahs: bookmarkedKeys())
-                    .ignoresSafeArea(edges: .bottom)
+                VStack(spacing: 0) {
+                    MushafPageHeader(
+                        ribbonLabel: surah.name,
+                        centerText: MushafHTMLView.arabicDigits(surahStartPage),
+                        juzText: juzText(page: surahStartPage),
+                        onBack: { dismiss() },
+                        actionsMenu: {
+                            Button { beginShare() } label: {
+                                Label(settings.t("مشاركة الصفحة", "Share page"),
+                                      systemImage: "square.and.arrow.up")
+                            }
+                            Button { mushafMode = false } label: {
+                                Label(settings.t("عرض القائمة", "List view"),
+                                      systemImage: "list.bullet.rectangle")
+                            }
+                        }
+                    )
+                    MushafHTMLView(surah: surah, ayahs: ayahs, bookmarkedAyahs: bookmarked,
+                                   onVerseTap: { _, ayah, _ in
+                                       guard let tapped = ayahs.first(where: { $0.number == ayah }) else { return }
+                                       pendingVerse = MushafHTMLView.PendingVerseTap(
+                                           surahID: tapped.surahID, ayahID: tapped.number,
+                                           page: tapped.page)
+                                   })
+                        .ignoresSafeArea(edges: .bottom)
+                }
+                .background(QuranPalette.paper.ignoresSafeArea())
+                .toolbar(.hidden, for: .navigationBar)
             } else {
                 ScrollView {
                     VStack(spacing: 10) {
@@ -138,23 +698,71 @@ struct QuranSurahView: View {
                     }
                 }
                 .background(Color(.systemGroupedBackground))
-            }
-        }
-        .navigationTitle(surah.name)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    mushafMode.toggle()
-                } label: {
-                    Image(systemName: mushafMode ? "list.bullet.rectangle" : "text.book.closed")
+                .navigationTitle(surah.name)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            mushafMode = true
+                        } label: {
+                            Image(systemName: "text.book.closed")
+                        }
+                    }
                 }
             }
         }
+        // Same VerseModal sheet the AyahRow presents, mirrored for the mushaf
+        // flow: the bookmark state is read fresh from QuranBookmarkStore (its
+        // add/remove inside the modal keeps the store the source of truth).
+        .sheet(item: $pendingVerse) { tapped in
+            if let aayah = ayahs.first(where: { $0.number == tapped.ayahID }) {
+                VerseModal(aayah: aayah, surah: surah,
+                           bookmarked: bookmarkState(surahID: tapped.surahID,
+                                                     ayah: tapped.ayahID))
+            }
+        }
+        .sheet(isPresented: $showShare) {
+            MushafShareSheet(items: shareItems)
+        }
         .onAppear {
-            guard ayahs.isEmpty else { return }
-            ayahs = QuranDatabase.shared.ayahs(surahID: surah.id)
+            if ayahs.isEmpty { ayahs = QuranDatabase.shared.ayahs(surahID: surah.id) }
             StreaksStore.setQuran(true)
+            bookmarked = bookmarkedKeys()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .dikhrBookmarksChanged)) { _ in
+            bookmarked = bookmarkedKeys()
+        }
+    }
+
+    /// The start printed page (the header's center number; the capture shows
+    /// "٩٧" bold inside the ornate capsule).
+    private var surahStartPage: Int {
+        ayahs.first.map(\.page) ?? max(surah.page, 1)
+    }
+
+    /// "جزء N" from the pages table; (page − 1) / 20 + 1 as a fallback.
+    private func juzText(page: Int) -> String {
+        let juz = pageStore.page(page).juzID > 0
+            ? pageStore.page(page).juzID
+            : max(1, (page - 1) / 20 + 1)
+        return DikhrStrings.tr("جزء \(MushafHTMLView.arabicDigits(juz))",
+                               "Juz \(juz)")
+    }
+
+    /// The "…" menu's share row: snapshot the registered mushaf webview
+    /// (WKWebView.takeSnapshot) and share the image; falls back to a text
+    /// position line if no webview is alive yet.
+    private func beginShare() {
+        Task { @MainActor in
+            if let image = await MushafWebViewRegistry.shared.snapshot(
+                key: MushafWebViewRegistry.surahKey(surah.id)) {
+                shareItems = [image]
+            } else {
+                shareItems = ["\(surah.name) — " +
+                              DikhrStrings.tr("صفحة \(surahStartPage)",
+                                              "Page \(surahStartPage)")]
+            }
+            showShare = true
         }
     }
 
@@ -164,6 +772,13 @@ struct QuranSurahView: View {
         Set(QuranBookmarkStore.bookmarks()
             .filter { $0.surah == surah.id }
             .map { "\($0.surah):\($0.ayah)" })
+    }
+
+    /// Fresh, non-owned bookmark binding for the mushaf-flow VerseModal: reads
+    /// the store directly; the modal's own add/remove toggles it.
+    private func bookmarkState(surahID: Int, ayah: Int) -> Binding<Bool> {
+        Binding(get: { QuranBookmarkStore.isBookmarked(surahID: surahID, ayah: ayah) },
+                set: { _ in })
     }
 
     private var mushafHeader: some View {
@@ -229,7 +844,7 @@ struct AyahRow: View {
                 Divider()
                 Text(settings.t("التفسير الميسر", "Clear Tafsir"))
                     .font(.footnote.bold())
-                    .foregroundStyle(.accent)
+                    .foregroundStyle(Color.accentColor)
                 Text(taf)
                     .font(.callout)
                     .lineSpacing(8)
@@ -302,7 +917,14 @@ enum QuranBookmarkStore {
         return list
     }
     static func recordLastRead(surahID: Int, ayah: Int) {
-        UserDefaults.standard.set(["surah": surahID, "ayah": ayah], forKey: "quranLastRead")
+        UserDefaults.standard.set(
+            ["surah": surahID, "ayah": ayah, "date": Date()],
+            forKey: "quranLastRead")
+    }
+    /// When the verse was last read (nil for pre-stamp entries — the المصحف
+    /// stat card shows "—" then).
+    static func lastReadDate() -> Date? {
+        (UserDefaults.standard.dictionary(forKey: "quranLastRead")?["date"]) as? Date
     }
     static func lastRead() -> (surah: Int, ayah: Int)? {
         guard let dict = UserDefaults.standard.dictionary(forKey: "quranLastRead"),
@@ -313,6 +935,7 @@ enum QuranBookmarkStore {
     private static func persist(_ list: [Bookmark]) {
         if let data = try? JSONEncoder().encode(list) {
             UserDefaults.standard.set(data, forKey: "quranBookmarks")
+            NotificationCenter.default.post(name: .dikhrBookmarksChanged, object: nil)
         }
     }
 }

@@ -6,24 +6,69 @@ import SQLite3
 /// block, swiped through page by page like a real mushaf (RTL).
 struct QuranPagesView: View {
     @EnvironmentObject private var settings: SettingsStore
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var store = QuranPageStore()
     @State private var page: Int
     @State private var surahs: [QuranSurah] = []
     @State private var showPageList = false
     @State private var showSurahList = false
+    /// The "…" menu's jump-to-page field (accepts Western or Arabic digits).
+    @State private var jumpText = ""
+    @State private var showJumpInput = false
+    /// The "…" menu's share: snapshot image (or a text fallback).
+    @State private var shareItems: [Any] = []
+    @State private var showShare = false
+    /// The one-shot search jump target for this appearance; cleared once the
+    /// user turns the page so a later swipe back renders without the highlight.
+    @State private var jumpTarget: QuranJumpTarget.Point?
+    @State private var appearedPage: Int = 0
+    /// Verse tapped on a printed page (the medallion spans post `dikhrVerse`)
+    /// — presents the VerseModal over the pages like the original.
+    @State private var pendingVerse: MushafHTMLView.PendingVerseTap?
 
-    init() {
-        // Khatmah: restore the last-read page on open.
-        _page = State(initialValue: QuranPagesTracker.restore())
+    init(startPage: Int? = nil) {
+        // Khatmah: restore the last-read page on open; the المصحف chips'
+        // (الأجزاء / الأحزاب / الصفحات) tiles open at a chosen page instead.
+        _page = State(initialValue: startPage ?? QuranPagesTracker.restore())
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            pageBar
+            MushafPageHeader(
+                ribbonLabel: settings.t("السور", "Surahs"),
+                centerText: MushafHTMLView.arabicDigits(page),
+                juzText: juzTitle,
+                onBack: { dismiss() },
+                onRibbon: { showSurahList = true },
+                actionsMenu: {
+                    Button { shareCurrentPage() } label: {
+                        Label(settings.t("مشاركة الصفحة", "Share page"),
+                              systemImage: "square.and.arrow.up")
+                    }
+                    Button { showPageList = true } label: {
+                        Label(settings.t("قائمة الصفحات", "Page List"),
+                              systemImage: "list.number")
+                    }
+                    Button { showSurahList = true } label: {
+                        Label(settings.t("السور", "Surahs"), systemImage: "book.closed")
+                    }
+                    Button {
+                        jumpText = ""
+                        showJumpInput = true
+                    } label: {
+                        Label(settings.t("انتقل إلى صفحة", "Go to page"),
+                              systemImage: "arrow.right.circle")
+                    }
+                }
+            )
             Divider().overlay(QuranPalette.darkGreen.opacity(0.18))
             TabView(selection: Binding(get: { page }, set: { page = $0 })) {
                 ForEach(1...604, id: \.self) { number in
-                    QuranPageCell(page: number, selection: page, store: store)
+                    QuranPageCell(page: number, selection: page, store: store, jumpTarget: jumpTarget,
+                                  onVerseTap: { surah, ayah, tappedPage in
+                                      pendingVerse = MushafHTMLView.PendingVerseTap(
+                                          surahID: surah, ayahID: ayah, page: tappedPage)
+                                  })
                         .tag(number)
                 }
             }
@@ -33,33 +78,51 @@ struct QuranPagesView: View {
         }
         .background(QuranPalette.paper.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button {
-                        showPageList = true
-                    } label: {
-                        Label(settings.t("قائمة الصفحات", "Page List"), systemImage: "list.number")
-                    }
-                    Button {
-                        showSurahList = true
-                    } label: {
-                        Label(settings.t("السور", "Surahs"), systemImage: "book.closed")
-                    }
-                } label: {
-                    Image(systemName: "square.grid.3x3")
-                        .foregroundStyle(QuranPalette.darkGreen)
-                }
-            }
-        }
+        .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: $showPageList) {
             QuranPageListSheet(store: store, current: page) { page = $0 }
         }
         .sheet(isPresented: $showSurahList) {
             QuranSurahJumpSheet(surahs: surahs) { page = $0 }
         }
+        .sheet(isPresented: $showShare) {
+            MushafShareSheet(items: shareItems)
+        }
+        // Jump-to-page: the alert's numeric field (Western or Arabic-Indic
+        // digits both parse).
+        .alert(settings.t("انتقل إلى صفحة", "Go to page"), isPresented: $showJumpInput) {
+            TextField(settings.t("١ – ٦٠٤", "1 – 604"), text: $jumpText)
+                .keyboardType(.numberPad)
+            Button(settings.t("انتقل", "Go")) {
+                if let number = MushafNumberInput.parse(jumpText),
+                   (1...604).contains(number) {
+                    page = number
+                }
+            }
+            Button(settings.t("إلغاء", "Cancel"), role: .cancel) {}
+        }
+        // Verse modal over the printed pages, mirrored from the surah screen's
+        // AyahRow sheet: the ayah comes from the tapped page's own rows, the
+        // bookmark state is read fresh from QuranBookmarkStore (the modal's
+        // add/remove keeps its highlight in the next paint).
+        .sheet(item: $pendingVerse) { tapped in
+            if let aayah = store.page(tapped.page).ayahs
+                .first(where: { $0.surahID == tapped.surahID && $0.number == tapped.ayahID }),
+               let surah = surahs.first(where: { $0.id == tapped.surahID })
+                ?? QuranDatabase.shared.surah(tapped.surahID) {
+                VerseModal(aayah: aayah, surah: surah,
+                           bookmarked: Binding(
+                               get: { QuranBookmarkStore.isBookmarked(
+                                   surahID: tapped.surahID, ayah: tapped.ayahID) },
+                               set: { _ in }))
+            }
+        }
         .onChange(of: page) { _, newPage in
             QuranPagesTracker.save(newPage)
+            // First paint done: turning the page drops the one-shot jump highlight.
+            if jumpTarget != nil && newPage != appearedPage {
+                jumpTarget = nil
+            }
         }
         .onAppear {
             if surahs.isEmpty { surahs = QuranDatabase.shared.surahs() }
@@ -69,44 +132,38 @@ struct QuranPagesView: View {
                let n = Int(jump), (1...604).contains(n) {
                 page = n
             }
+            // Consume the athkar-search jump exactly once per appearance.
+            if jumpTarget == nil {
+                jumpTarget = QuranJumpTarget.take()
+            }
+            appearedPage = page
         }
     }
 
-    // MARK: - Page navigation bar
+    // MARK: - The "…" menu actions
 
-    private var pageBar: some View {
-        HStack(spacing: 12) {
-            // Juz indicator (leading = right in RTL, like the mushaf band).
-            HStack(spacing: 4) {
-                Text("❁")
-                Text(juzTitle)
-                    .font(.caption.bold())
+    /// Share the visible page: snapshot its registered webview (takeSnapshot →
+    /// activity sheet), falling back to a text position line.
+    private func shareCurrentPage() {
+        Task { @MainActor in
+            if let image = await MushafWebViewRegistry.shared.snapshot(
+                key: MushafWebViewRegistry.pageKey(page)) {
+                shareItems = [image]
+            } else {
+                let label = settings.t("صفحة \(QuranPageHTML.arabicDigits(page))",
+                                       "Page \(page)")
+                shareItems = ["\(label) — \(store.page(page).surahNames)"]
             }
-            .foregroundStyle(QuranPalette.darkGreen)
-
-            Spacer()
-
-            Button {
-                showPageList = true
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "list.number")
-                    Text(settings.t("صفحة \(QuranPageHTML.arabicDigits(page))",
-                                    "Page \(QuranPageHTML.arabicDigits(page))"))
-                        .font(.headline)
-                }
-                .foregroundStyle(QuranPalette.darkGreen)
-            }
-            .accessibilityLabel(settings.t("الانتقال إلى صفحة", "Go to page"))
+            showShare = true
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .background(QuranPalette.paper)
     }
 
     private var juzTitle: String {
-        DikhrStrings.tr("الجزء \(QuranPageHTML.arabicDigits(store.page(page).juzID))",
-                        "Juz \(store.page(page).juzID)")
+        let juzID = store.page(page).juzID > 0
+            ? store.page(page).juzID
+            : max(1, (page - 1) / 20 + 1)
+        return DikhrStrings.tr("جزء \(QuranPageHTML.arabicDigits(juzID))",
+                               "Juz \(juzID)")
     }
 }
 
@@ -117,6 +174,11 @@ struct QuranPageCell: View {
     let page: Int
     let selection: Int
     let store: QuranPageStore
+    /// One-shot search jump (surah+ayah) for this appearance, or nil. Only the
+    /// page actually holding that ayah renders the olive-gold highlight.
+    var jumpTarget: QuranJumpTarget.Point?
+    /// Verse tap bridged up to QuranPagesView's sheet: (surah, ayah, page).
+    var onVerseTap: ((Int, Int, Int) -> Void)? = nil
 
     /// "surah:ayah" bookmark keys on this page — drives the yellow highlight.
     private func bookmarkedKeys(_ ayahs: [QuranAyah]) -> Set<String> {
@@ -127,12 +189,20 @@ struct QuranPageCell: View {
     var body: some View {
         if abs(page - selection) <= 1 {
             let data = store.page(page)
+            let jump: QuranJumpTarget.Point? = {
+                guard let target = jumpTarget,
+                      data.ayahs.contains(where: { $0.surahID == target.surah && $0.number == target.ayah })
+                else { return nil }
+                return target
+            }()
             QuranPageWebView(page: page,
                              ayahs: data.ayahs,
                              juzLabel: settings.t("الجزء \(QuranPageHTML.arabicDigits(data.juzID))",
                                                   "Juz \(data.juzID)"),
                              bandSurahName: data.surahNames,
-                             bookmarkedAyahs: bookmarkedKeys(data.ayahs))
+                             bookmarkedAyahs: bookmarkedKeys(data.ayahs),
+                             jumpAyah: jump,
+                             onVerseTap: onVerseTap)
         } else {
             ZStack {
                 QuranPalette.paper.ignoresSafeArea()
@@ -148,19 +218,61 @@ struct QuranPageCell: View {
     }
 }
 
+// MARK: - One-shot target-ayah jump (athkar search → mushaf highlight)
+
+/// One-shot jump target: the athkar search sets (surah, ayah) right before
+/// pushing the mushaf; QuranPagesView takes it on appear and the matched ayah's
+/// span renders with the olive-gold `.jump` highlight (see QuranPageHTML).
+/// Cleared after the first paint (taken on appear) so nothing lingers.
+enum QuranJumpTarget {
+    struct Point: Equatable {
+        let surah: Int
+        let ayah: Int
+    }
+
+    private static var pending: Point?
+
+    static func set(surah: Int, ayah: Int) {
+        pending = Point(surah: surah, ayah: ayah)
+    }
+
+    /// Read-and-clear: only the push that follows the search highlight consumes it.
+    static func take() -> Point? {
+        defer { pending = nil }
+        return pending
+    }
+}
+
 // MARK: - Khatmah / last-read page
 
 enum QuranPagesTracker {
     private static let key = "quranLastPage"
+    /// Fresh in-store when the mushaf is opened at a page, mirroring the
+    /// original stat cards' per-card "اليوم · 6:00 م" read stamps.
+    private static let dateKey = "quranLastPageDate"
 
     static func restore() -> Int {
         let stored = UserDefaults.standard.object(forKey: key) as? Int ?? 1
         return min(max(stored, 1), 604)
     }
 
+    /// The stored page or nil (never-opened mushaf) — the المصحف stats cards
+    /// show "—" placeholders then; restore() keeps the 1-page default.
+    static func storedPage() -> Int? {
+        guard let stored = UserDefaults.standard.object(forKey: key) as? Int else {
+            return nil
+        }
+        return min(max(stored, 1), 604)
+    }
+
+    static func lastReadDate() -> Date? {
+        UserDefaults.standard.object(forKey: dateKey) as? Date
+    }
+
     static func save(_ page: Int) {
         guard (1...604).contains(page) else { return }
         UserDefaults.standard.set(page, forKey: key)
+        UserDefaults.standard.set(Date(), forKey: dateKey)
     }
 }
 

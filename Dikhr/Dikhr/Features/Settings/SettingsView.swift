@@ -2,87 +2,109 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject private var settings: SettingsStore
-    @State private var methods = SettingsStore.loadMethods()
     @State private var showAlarms = false
     @State private var showTheme = false
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section(settings.t("الموقع", "Location")) {
-                    NavigationLink("\(settings.t("المدينة", "City")): \(settings.city.name)") {
-                        CityPickerView()
+            SettingsSectionsView(sheetTopCards: false)
+                .navigationTitle(settings.t("الإعدادات", "Settings"))
+                .onAppear {
+                    if ProcessInfo.processInfo.environment["DIKHR_ALARM_PAGE"] != nil {
+                        showAlarms = true
+                    }
+                    if ProcessInfo.processInfo.environment["DIKHR_THEME_PAGE"] != nil {
+                        showTheme = true
                     }
                 }
-                Section(settings.t("مواقيت الصلاة", "Prayer Times")) {
-                    NavigationLink(settings.t("منبه الصلاة", "Prayer Alarm")) {
-                        AlarmSettingsView()
-                    }
-                    Picker(settings.t("طريقة الحساب", "Calculation Method"), selection: $settings.methodID) {
-                        ForEach(methods) { method in
-                            Text(method.name).tag(method.id)
-                        }
-                    }
+                .navigationDestination(isPresented: $showAlarms) {
+                    AlarmSettingsView()
                 }
-                Section(settings.t("تنبيهات الأذكار والأذان", "Athkar & Adhan Alerts")) {
-                    MomentsSchedulerToggleRow()
+                .navigationDestination(isPresented: $showTheme) {
+                    ThemeSettingsView()
                 }
-                Section(settings.t("اللغة", "Language")) {
-                    Picker(settings.t("لغة الواجهة", "App Language"), selection: $settings.lang) {
-                        Text("العربية").tag(SettingsStore.Language.arabic)
-                        Text("English").tag(SettingsStore.Language.english)
-                    }
-                    .pickerStyle(.segmented)
-                }
-                Section(settings.t("المظهر", "Appearance")) {
-                    NavigationLink(settings.t("الثيم والأيقونة", "Theme & Icon")) {
-                        ThemeSettingsView()
-                    }
-                    Toggle(settings.t("تكبير الخط", "Larger Text"), isOn: $settings.fontSizeBoost)
-                    Toggle(settings.t("إظهار الترجمة", "Show Translation"), isOn: $settings.showTranslation)
-                }
-                Section(settings.t("العداد", "Counter")) {
-                    CounterDelayRow()
-                }
-                Section(settings.t("عُفص الصلاة", "Prayer Focus")) {
-                    PrayerFocusSettingsRow()
-                }
-                Section(settings.t("الاشتراك والبيانات", "Subscription & Data")) {
-                    SettingsProRow()
-                    NavigationLink(settings.t("نسخ احتياطي", "Backup")) {
-                        BackupView()
-                    }
-                }
-                Section(settings.t("معلومات", "About")) {
-                    NavigationLink(settings.t("الأسئلة الشائعة", "FAQ")) { FaqView() }
-                    NavigationLink(settings.t("اختبار", "Quiz")) { QuizView() }
-                    NavigationLink(settings.t("الشخصيات الإسلامية", "Islamic Figures")) { EventsView() }
-                    NavigationLink(settings.t("الأخبار", "News")) { NewsView() }
-                }
-                Section(settings.t("التقويم", "Calendar")) {
-                    Stepper("\(settings.t("تعديل التاريخ الهجري", "Hijri Date Offset")): \(settings.hijriAdjustment)",
-                            value: $settings.hijriAdjustment, in: -3...3)
-                }
-                Section {
-                    Label(settings.t("أذكار ١.٠ — معاينة", "Athkar 1.0 — Preview"), systemImage: "sparkles")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// The settings Form body, shared by the settings tab (SettingsView) and the
+/// settings bottom sheet (SettingsSheetView). `sheetTopCards` prepends the
+/// original sheet's special cards (التطبيق / ويدجت على ذوقك / النسخة الحصرية).
+struct SettingsSectionsView: View {
+    @EnvironmentObject private var settings: SettingsStore
+    @State private var methods = SettingsStore.loadMethods()
+    var sheetTopCards = false
+
+    var body: some View {
+        Form {
+            if sheetTopCards {
+                DikhrSettingsTopCards()
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+            }
+            Section(settings.t("الموقع", "Location")) {
+                NavigationLink("\(settings.t("المدينة", "City")): \(settings.city.name)") {
+                    CityPickerView()
                 }
             }
-            .navigationTitle(settings.t("الإعدادات", "Settings"))
-            .onAppear {
-                if ProcessInfo.processInfo.environment["DIKHR_ALARM_PAGE"] != nil {
-                    showAlarms = true
+            Section(settings.t("مواقيت الصلاة", "Prayer Times")) {
+                NavigationLink(settings.t("منبه الصلاة", "Prayer Alarm")) {
+                    AlarmSettingsView()
                 }
-                if ProcessInfo.processInfo.environment["DIKHR_THEME_PAGE"] != nil {
-                    showTheme = true
+                Picker(settings.t("طريقة الحساب", "Calculation Method"), selection: $settings.methodID) {
+                    ForEach(methods) { method in
+                        Text(method.name).tag(method.id)
+                    }
                 }
             }
-            .navigationDestination(isPresented: $showAlarms) {
-                AlarmSettingsView()
+            Section(settings.t("تنبيهات الأذكار والأذان", "Athkar & Adhan Alerts")) {
+                MomentsSchedulerToggleRow()
             }
-            .navigationDestination(isPresented: $showTheme) {
-                ThemeSettingsView()
+            Section(settings.t("الساعة", "Watch")) {
+                NavigationLink(settings.t("استخدم في الساعة", "Use on the Watch")) {
+                    WatchSectionsSettingsView()
+                }
+            }
+            Section(settings.t("اللغة", "Language")) {
+                Picker(settings.t("لغة الواجهة", "App Language"), selection: $settings.lang) {
+                    Text("العربية").tag(SettingsStore.Language.arabic)
+                    Text("English").tag(SettingsStore.Language.english)
+                }
+                .pickerStyle(.segmented)
+            }
+            Section(settings.t("المظهر", "Appearance")) {
+                NavigationLink(settings.t("الثيم والأيقونة", "Theme & Icon")) {
+                    ThemeSettingsView()
+                }
+                Toggle(settings.t("تكبير الخط", "Larger Text"), isOn: $settings.fontSizeBoost)
+                Toggle(settings.t("إظهار الترجمة", "Show Translation"), isOn: $settings.showTranslation)
+            }
+            Section(settings.t("العداد", "Counter")) {
+                CounterDelayRow()
+            }
+            Section(settings.t("عُفص الصلاة", "Prayer Focus")) {
+                PrayerFocusSettingsRow()
+            }
+            Section(settings.t("الاشتراك والبيانات", "Subscription & Data")) {
+                SettingsProRow()
+                NavigationLink(settings.t("نسخ احتياطي", "Backup")) {
+                    BackupView()
+                }
+            }
+            Section(settings.t("معلومات", "About")) {
+                NavigationLink(settings.t("الأسئلة الشائعة", "FAQ")) { FaqView() }
+                NavigationLink(settings.t("اختبار", "Quiz")) { QuizView() }
+                NavigationLink(settings.t("الشخصيات الإسلامية", "Islamic Figures")) { EventsView() }
+                NavigationLink(settings.t("الأخبار", "News")) { NewsView() }
+            }
+            Section(settings.t("التقويم", "Calendar")) {
+                Stepper("\(settings.t("تعديل التاريخ الهجري", "Hijri Date Offset")): \(settings.hijriAdjustment)",
+                        value: $settings.hijriAdjustment, in: -3...3)
+            }
+            Section {
+                Label(settings.t("أذكار ١.٠ — معاينة", "Athkar 1.0 — Preview"), systemImage: "sparkles")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
     }

@@ -92,7 +92,7 @@ struct DikhrSidebar: View {
                 DeepLinkRouter.shared.pendingAction = "myAthkar"
             } label: {
                 Label("أذكاري", systemImage: "text.badge.plus")
-                    .foregroundStyle(myAthkarActive ? Color.accent : Color.primary)
+                    .foregroundStyle(myAthkarActive ? Color.accentColor : Color.primary)
             }
         }
         .listStyle(.sidebar)
