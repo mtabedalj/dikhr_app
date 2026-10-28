@@ -54,6 +54,7 @@ struct AthkarFollowupView: View {
                 .padding(.bottom, 24)
             }
         }
+        .environment(\.layoutDirection, .leftToRight)
         .toolbar(.hidden, for: .navigationBar)
         .onAppear(perform: refresh)
         .onReceive(NotificationCenter.default.publisher(

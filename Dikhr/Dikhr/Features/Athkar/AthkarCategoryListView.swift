@@ -151,7 +151,8 @@ struct AthkarCategoryListView: View {
                 refreshRing()
                 if let push = ProcessInfo.processInfo.environment["DIKHR_PUSH"] {
                     switch push {
-                    case "allahNames", "myAthkar", "khatmah", "favorites", "search", "more":
+                    case "allahNames", "myAthkar", "khatmah", "favorites", "search", "more",
+                     "salahPage", "followupPage":
                         path.append(push)
                     default:
                         if let target = categories.first(where: { $0.id == push }) {
