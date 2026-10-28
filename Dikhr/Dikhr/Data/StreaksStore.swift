@@ -1,4 +1,5 @@
 import Foundation
+import WidgetKit
 
 struct DayCheckin: Codable, Hashable {
     var date: String
@@ -69,6 +70,8 @@ enum StreaksStore {
             UserDefaults.standard.set(data, forKey: "streaks")
         }
         persistBests()
+        DikhrStreaksBridge.mirrorFromAppDefaults()
+        WidgetCenter.shared.reloadTimelines(ofKind: "DikhrDailyTasks")
     }
 
     static func setPrayers(_ value: Bool) { update { $0.prayers = value } }

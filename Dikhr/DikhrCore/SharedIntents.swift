@@ -1,5 +1,8 @@
 import Foundation
 import AppIntents
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 /// Loads the bundled prayer-calculation methods (bundled in DikhrCore/Resources),
 /// shared by the app and the widget extension.
@@ -52,6 +55,12 @@ struct IncrementCounterIntent: AppIntent {
             DikhrShared.saveCounters(counters)
             #if canImport(ActivityKit) && os(iOS)
             DikhrLiveActivity.update(count: newValue, name: target.name)
+            #endif
+            // Keep the interactive counter tile honest between snapshots.
+            // Keep the interactive counter tile honest between snapshots.
+            #if canImport(WidgetKit)
+            WidgetCenter.shared.reloadTimelines(ofKind: "DikhrCounter")
+            WidgetCenter.shared.reloadTimelines(ofKind: "DikhrDailyTasks")
             #endif
         }
         return .result(dialog: "\(target.name): \(newValue)")
