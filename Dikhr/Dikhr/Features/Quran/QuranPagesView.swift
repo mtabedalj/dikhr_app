@@ -16,9 +16,10 @@ struct QuranPagesView: View {
     @State private var jumpTarget: QuranJumpTarget.Point?
     @State private var appearedPage: Int = 0
 
-    init() {
-        // Khatmah: restore the last-read page on open.
-        _page = State(initialValue: QuranPagesTracker.restore())
+    init(startPage: Int? = nil) {
+        // Khatmah: restore the last-read page on open; the المصحف chips'
+        // (الأجزاء / الأحزاب / الصفحات) tiles open at a chosen page instead.
+        _page = State(initialValue: startPage ?? QuranPagesTracker.restore())
     }
 
     var body: some View {
@@ -200,15 +201,32 @@ enum QuranJumpTarget {
 
 enum QuranPagesTracker {
     private static let key = "quranLastPage"
+    /// Fresh in-store when the mushaf is opened at a page, mirroring the
+    /// original stat cards' per-card "اليوم · 6:00 م" read stamps.
+    private static let dateKey = "quranLastPageDate"
 
     static func restore() -> Int {
         let stored = UserDefaults.standard.object(forKey: key) as? Int ?? 1
         return min(max(stored, 1), 604)
     }
 
+    /// The stored page or nil (never-opened mushaf) — the المصحف stats cards
+    /// show "—" placeholders then; restore() keeps the 1-page default.
+    static func storedPage() -> Int? {
+        guard let stored = UserDefaults.standard.object(forKey: key) as? Int else {
+            return nil
+        }
+        return min(max(stored, 1), 604)
+    }
+
+    static func lastReadDate() -> Date? {
+        UserDefaults.standard.object(forKey: dateKey) as? Date
+    }
+
     static func save(_ page: Int) {
         guard (1...604).contains(page) else { return }
         UserDefaults.standard.set(page, forKey: key)
+        UserDefaults.standard.set(Date(), forKey: dateKey)
     }
 }
 
