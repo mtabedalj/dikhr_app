@@ -1,4 +1,8 @@
 import SwiftUI
+
+extension Notification.Name {
+    static let dikhrBookmarksChanged = Notification.Name("dikhr-bookmarks-changed")
+}
 import SQLite3
 
 // MARK: - المصحف — Quran tab root, rebuilt from live capture /tmp/ath_quran.png
@@ -629,6 +633,7 @@ struct QuranSurahView: View {
     let surah: QuranSurah
     @State private var ayahs: [QuranAyah] = []
     @State private var mushafMode = true
+    @State private var bookmarked: Set<String> = []
     /// Verse tapped inside the mushaf HTML flow (the medallion spans post
     /// `dikhrVerse`) — presents the same VerseModal the list rows use.
     @State private var pendingVerse: MushafHTMLView.PendingVerseTap?
@@ -636,7 +641,7 @@ struct QuranSurahView: View {
     var body: some View {
         Group {
             if mushafMode {
-                MushafHTMLView(surah: surah, ayahs: ayahs, bookmarkedAyahs: bookmarkedKeys(),
+                MushafHTMLView(surah: surah, ayahs: ayahs, bookmarkedAyahs: bookmarked,
                                onVerseTap: { _, ayah, _ in
                                    guard let tapped = ayahs.first(where: { $0.number == ayah }) else { return }
                                    pendingVerse = MushafHTMLView.PendingVerseTap(
@@ -681,9 +686,12 @@ struct QuranSurahView: View {
             }
         }
         .onAppear {
-            guard ayahs.isEmpty else { return }
-            ayahs = QuranDatabase.shared.ayahs(surahID: surah.id)
+            if ayahs.isEmpty { ayahs = QuranDatabase.shared.ayahs(surahID: surah.id) }
             StreaksStore.setQuran(true)
+            bookmarked = bookmarkedKeys()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .dikhrBookmarksChanged)) { _ in
+            bookmarked = bookmarkedKeys()
         }
     }
 
@@ -856,6 +864,7 @@ enum QuranBookmarkStore {
     private static func persist(_ list: [Bookmark]) {
         if let data = try? JSONEncoder().encode(list) {
             UserDefaults.standard.set(data, forKey: "quranBookmarks")
+            NotificationCenter.default.post(name: .dikhrBookmarksChanged, object: nil)
         }
     }
 }
